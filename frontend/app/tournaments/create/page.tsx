@@ -1,8 +1,13 @@
+import CreateTournamentView from "@/components/createTournament/CreateTournamentView";
+import React from "react";
+
 export default function TournamentCreatePage() {
   return (
-    <div>
-      <h1>Create a Tournament</h1>
-      <p>Here is the tournament creation form</p>
-    </div>
+    <React.Fragment>
+      {/* Manually setting the background to the preferred dark background */}
+      <div style={{ backgroundColor: "var(--background)" }}>
+        <CreateTournamentView />
+      </div>
+    </React.Fragment>
   );
 }

@@ -1,15 +1,26 @@
 @import url("@radix-ui/themes/styles.css");
 
-
+/* Definition of colors used in light mode */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --form-background: #f1f1f1;
+  --text-color: #333333;
+  --border-color: var(--gray-6);
+  --input-color: #ffffff;
+  --submit-button-color: #ffffff;
 }
 
+/* Definition of colors used in dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --form-background: #131313;
+    --text-color: #ffffff;
+    --border-color: var(--gray-8);
+    --input-color: #2a2a2a;
+    --submit-button-color: #2a2a2a;
   }
 }
 
