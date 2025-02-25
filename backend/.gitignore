@@ -38,3 +38,7 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+# Ignore Spring Boot properties
+src/main/resources/application.properties
+src/main/resources/application.yml
