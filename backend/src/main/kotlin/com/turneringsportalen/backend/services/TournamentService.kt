@@ -7,7 +7,7 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.datetime.Instant
 
 @Service
-class TournamentService (private val client: SupabaseClient) {
+class TournamentService(private val client: SupabaseClient) {
 
     // Function for the overarching algorithm of the app, automatically setting up a match schedule given a tournament, participants and playing fields exist.
     // Gives back a list of matches so that the webpage can display them and so that changes might be made
@@ -15,18 +15,19 @@ class TournamentService (private val client: SupabaseClient) {
         // Todo: Set up this damn thing
     }
 
-    suspend fun createTournament(tournament: Tournament){
+    suspend fun createTournament(tournament: Tournament) {
         client.from("tournament").insert(tournament)
     }
 
-    suspend fun addParticipant(participant: Participant){
+
+    suspend fun addParticipant(participant: Participant) {
         client.from("participant").insert(participant)
     }
 
-    suspend fun addMatch(match: Match, participants: List<Participant>){
+    suspend fun addMatch(match: Match, participants: List<Participant>) {
         client.from("match").insert(match)
 
-        for ((index, participant) in participants.withIndex()){
+        for ((index, participant) in participants.withIndex()) {
             client.from("match_participant").insert(MatchParticipant(match.matchId, participant.participantId, index))
         }
     }
@@ -110,7 +111,7 @@ class TournamentService (private val client: SupabaseClient) {
         }
     }
 
-    suspend fun update(tournamentId : Int, name : String, startDate : Instant, location : String, matchInterval : Int) {
+    suspend fun update(tournamentId: Int, name: String, startDate: Instant, location: String, matchInterval: Int) {
         client.from("tournament").update(
             {
                 set("tournament_id", tournamentId)

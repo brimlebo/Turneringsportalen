@@ -2,7 +2,7 @@
  * This file contains the functions to communicate with the server
  */
 
-import { TournamentNoID } from "./types";
+import { CreateTournamentDTO } from "./types";
 
 const API_URL = "http://localhost:8080";
 
@@ -14,6 +14,9 @@ export async function fetchTournaments() {
   const response = await fetch(`${API_URL}/tournaments`, {
     method: "GET",
     cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   const data = await response.json();
   return data;
@@ -28,6 +31,9 @@ export async function fetchTournamentById(id: number) {
   const response = await fetch(`${API_URL}/tournaments/${id}`, {
     method: "GET",
     cache: "no-store", // TEMP FOR TESTING
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   const data = await response.json();
   return data;
@@ -38,7 +44,7 @@ export async function fetchTournamentById(id: number) {
  * @param data The tournament object being created
  *
  */
-export async function createTournament(data: TournamentNoID) {
+export async function createTournament(data: CreateTournamentDTO) {
   const response = await fetch(`${API_URL}/tournaments`, {
     method: "POST",
     headers: {

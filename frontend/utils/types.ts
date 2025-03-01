@@ -43,10 +43,10 @@ export type TournamentWithParticipantsAndMatches = Tournament & {
   matches: Match[];
 };
 
-export type TournamentNoID = {
+export type CreateTournamentDTO = {
   name: string;
-  start_date: Date;
+  start_date: string;
   location: string;
-  fields: TournamentField[];
+  field_names: string[];
   match_interval: number;
 };
