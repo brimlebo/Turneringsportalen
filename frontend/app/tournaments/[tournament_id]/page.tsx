@@ -1,8 +1,16 @@
-export default function TournamentPage() {
+import React from "react";
+import TournamentView from "@/components/tournament/TournamentView";
+
+type Params = Promise<{ tournament_id: string }>;
+
+export default async function TournamentPage(props: { params: Params }) {
+  const param = await props.params;
+  const tournament_key = parseInt(param.tournament_id, 10);
+
+  console.log(tournament_key);
   return (
     <div>
-      <h1>Tournament Details</h1>
-      <p>Here are the details of the tournament</p>
+      <TournamentView id={tournament_key} />
     </div>
   );
 }
