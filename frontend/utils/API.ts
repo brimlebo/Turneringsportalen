@@ -2,7 +2,7 @@
  * This file contains the functions to communicate with the server
  */
 
-import { CreateTournamentDTO } from "./types";
+import { CreateTournamentDTO, Match, MatchParticipant } from "./types";
 
 const API_URL = "http://localhost:8080";
 
@@ -55,5 +55,48 @@ export async function createTournament(data: CreateTournamentDTO) {
 
   if (!response.ok) {
     throw new Error("Failed to create tournament");
+  }
+}
+
+function test() {
+  let matches: Match[] = [];
+  const participants = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  const minMatch = 3;
+  const groupSize = 4;
+
+  let groups = [];
+
+  for (let i = 0; i < participants.length; i += groupSize) {
+    if (i % groupSize === 1) {
+      groups.push(participants.slice(i, participants.length - 1));
+    } else {
+      groups.push(participants.slice(i, i + groupSize));
+    }
+  }
+
+  let matchParticipants: MatchParticipant[] = [];
+
+  for (let group of groups) {
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const match = {
+          match_id: 0,
+          tournament_id: 1,
+          time: new Date(),
+          game_location_id: 1,
+        };
+        matches.push(match);
+        matchParticipants.push({
+          match_id: match.match_id,
+          participant_id: 1,
+          index: 1,
+        });
+        matchParticipants.push({
+          match_id: match.match_id,
+          participant_id: 2,
+          index: 2,
+        });
+      }
+    }
   }
 }
