@@ -12,4 +12,3 @@ data class CreateTournamentDTO(
     @SerialName("match_interval") val matchInterval: Int,
     @SerialName("field_names") val fieldNames: List<String> = emptyList() // Ensure it has a default value
 )
-
