@@ -1,0 +1,11 @@
+.container {
+    padding: 16px;
+    min-height: 100vh;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: auto;
+  }
