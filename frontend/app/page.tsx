@@ -1,15 +1,6 @@
 import React from "react";
-import styles from "@/styles/page.module.css";
 import Image from "next/image";
-import {
-  Button,
-  Box,
-  Container,
-  Flex,
-  Grid,
-  Section,
-  Separator,
-} from "@radix-ui/themes";
+import {Button, Box, Container, Flex, Grid, Section, Separator,} from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
 import LoginDialog from "@/components/login/LogIn";
 

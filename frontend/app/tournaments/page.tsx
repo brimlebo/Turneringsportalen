@@ -1,6 +1,6 @@
 import TournamentsOverview from "@/components/tournament/TournamentsOverview";
 import React from "react";
-import styles from "../../styles/tournaments/TournamentsPageStyle.module.css";
+import styles from "@/styles/page.module.css"
 
 export default function TournamentsPage() {
     return (

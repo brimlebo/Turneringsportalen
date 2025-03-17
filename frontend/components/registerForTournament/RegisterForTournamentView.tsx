@@ -1,6 +1,6 @@
-import RegisterForTournamentForm from "./RegisterForTournamentForm";
-import React from "react";
-import styles from "../../styles/registerForTournament/RegisterForTournamentViewStyle.module.css";
+import RegisterForTournamentForm from "./RegisterForTournamentForm"
+import React from "react"
+import styles from "@/styles/page.module.css"
 
 /**
  * A component to create the view of the page where the user can create a tournament

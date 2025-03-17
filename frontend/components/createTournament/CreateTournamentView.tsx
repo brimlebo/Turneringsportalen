@@ -1,5 +1,6 @@
 import CreateTournamentForm from "./CreateTournamentForm";
-import styles from "../../styles/createTournament/CreateTournamentViewStyle.module.css";
+import styles from "@/styles/page.module.css"
+
 /**
  * A component to create the view of the page where the user can create a tournament
  * @returns The view of the page where the user can create a tournament
