@@ -1,6 +1,5 @@
 package com.turneringsportalen.backend.services
 
-import com.turneringsportalen.backend.dto.MatchParticipantWithParticipantDTO
 import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
 import com.turneringsportalen.backend.entities.*
 import com.turneringsportalen.backend.utils.createGroups
@@ -76,8 +75,8 @@ class TournamentService(private val client: SupabaseClient) {
         return matches;
     }
 
-    suspend fun createTournament(tournament: Tournament) {
-        client.from("tournament").insert(tournament)
+    suspend fun createTournament(tournament: Tournament): Tournament {
+        return client.from("tournament").insert(tournament){ select() }.decodeSingle<Tournament>()
     }
 
 

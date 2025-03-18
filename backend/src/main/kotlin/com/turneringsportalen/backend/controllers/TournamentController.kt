@@ -2,6 +2,8 @@ package com.turneringsportalen.backend.controllers
 
 import com.turneringsportalen.backend.daos.CreateTournamentDTO
 import com.turneringsportalen.backend.entities.Tournament
+import com.turneringsportalen.backend.entities.TournamentField
+import com.turneringsportalen.backend.services.TournamentFieldService
 import com.turneringsportalen.backend.services.TournamentService
 import kotlinx.coroutines.runBlocking
 import org.springframework.web.bind.annotation.*
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/tournaments")
 @CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600) // Restrict to frontend
-class TournamentController(private val service: TournamentService) {
+class TournamentController(private val service: TournamentService, private val fieldService: TournamentFieldService) {
 
     @GetMapping
     fun findAllTournaments() = runBlocking { service.findAllTournaments() }
@@ -19,13 +21,20 @@ class TournamentController(private val service: TournamentService) {
 
     @PostMapping
     fun addNewTournament(@RequestBody tournamentDTO: CreateTournamentDTO) = runBlocking {
-        val tournament = Tournament(
+        var tournament = Tournament(
             name = tournamentDTO.name,
             startDate = tournamentDTO.startDate,
             location = tournamentDTO.location,
             matchInterval = tournamentDTO.matchInterval
         )
-        service.createTournament(tournament)
+        tournament = service.createTournament(tournament)
+        for (fieldName in tournamentDTO.fieldNames) {
+            val field = TournamentField(
+                tournamentId = tournament.tournamentId!!,
+                fieldName = fieldName
+            )
+            fieldService.addTournamentField(field)
+        }
     }
 
     @PutMapping("/{id}")
