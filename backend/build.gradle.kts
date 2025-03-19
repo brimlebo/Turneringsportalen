@@ -24,10 +24,17 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+
 	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
 	implementation("io.github.jan-tennert.supabase:postgrest-kt")
 
 	implementation("io.ktor:ktor-client-cio:3.1.1")
+
+	// Security and JWT
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt:0.12.6") // JWT verification library
+
+
 
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
