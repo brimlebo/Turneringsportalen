@@ -1,13 +1,15 @@
 package com.turneringsportalen.backend.utils
 
+import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
+import com.turneringsportalen.backend.entities.Match
 import com.turneringsportalen.backend.entities.Participant
 import com.turneringsportalen.backend.entities.Tournament
 import com.turneringsportalen.backend.entities.TournamentField
 import kotlinx.datetime.Clock
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlinx.datetime.Instant
+import java.time.Duration
+import kotlin.test.*
+import kotlin.time.Duration.Companion.minutes
 
 class SchedulingUtilsTest {
 
@@ -1036,4 +1038,342 @@ class SchedulingUtilsTest {
         // Ensure playedMatches is same size as matches
         assertEquals(playedMatches.size, matches.size, "Set of pairings is same size as original match list")
     }
+
+    @Test
+    fun testCreateGroupsAndMatches() {
+        val participants = potentialParticipants
+        val minimumMatches = 3
+        val standardGroupSize = 4
+
+        val groups = createGroups(participants, minimumMatches);
+
+        // Ensure we have 5 groups
+        assertEquals(5, groups.size)
+
+        //Ensure last group is the exception group
+        assertEquals(6, groups[groups.size-1].size)
+
+        val matches = mutableListOf<MatchWithParticipantsDTO>();
+
+        for(group in groups) {
+            if(group.size == standardGroupSize) {
+                matches += scheduleStandardGroups(group, minimumMatches, tournament, potentialFields)
+            }
+            else {
+                matches += scheduleExceptionGroups(group, minimumMatches, group.size, tournament, potentialFields)
+            }
+        }
+
+        // Check that 33 matches where generated
+        assertEquals(33, matches.size)
+
+        // Count matches per participant
+        val matchCounts = mutableMapOf<Int, Int>() // Maps participant ID to the number of matches played
+        for (match in matches) {
+            for (participant in match.participants) {
+                matchCounts[participant.participant.participantId ?: 0] =
+                    matchCounts.getOrDefault(participant.participant.participantId, 0) + 1
+            }
+        }
+
+        // Assert that each participant has played exactly 3 matches
+        for(group in groups) {
+            for (participant in group) {
+                val count = matchCounts[participant.participantId] ?: 0
+                assertEquals(3, count, "Participant ${participant.participantId} should have exactly 3 matches")
+            }
+        }
+
+        val playedMatches = mutableSetOf<Pair<Int, Int>>() // Stores unique matchups
+
+        for (match in matches) {
+            val participantIds = match.participants.map { it.participant.participantId ?: 0 }
+
+            // Ensure each match has exactly two participants
+            assertEquals(2, participantIds.size, "Each match should have exactly two participants")
+
+            val (id1, id2) = participantIds.sorted() // Normalize order
+            val matchPair = id1 to id2
+
+            // Check if the match pair already exists
+            assertFalse(playedMatches.contains(matchPair), "Duplicate match found between $id1 and $id2")
+
+            // Add match pair to the set
+            playedMatches.add(matchPair)
+
+            // Update match counts
+            for (participant in match.participants) {
+                matchCounts[participant.participant.participantId ?: 0] =
+                    matchCounts.getOrDefault(participant.participant.participantId, 0) + 1
+            }
+        }
+
+        // Ensure playedMatches is same size as matches
+        assertEquals(playedMatches.size, matches.size, "Set of pairings is same size as original match list")
+    }
+
+    @Test
+    fun testAssigningTimeAndFieldToMatches() {
+        val participants = potentialParticipants
+        val minimumMatches = 3
+        val standardGroupSize = 4
+        val matchInterval = tournament.matchInterval
+
+        val groups = createGroups(participants, minimumMatches)
+
+        // Keeping the group structure
+        val matches = mutableListOf<MutableList<MatchWithParticipantsDTO>>()
+        for ((index, group) in groups.withIndex()) {
+            // Schedule the matches for the current group.
+            var groupMatches = mutableListOf<MatchWithParticipantsDTO>()
+            if (group.size == standardGroupSize) {
+                groupMatches = scheduleStandardGroups(group, minimumMatches, tournament, potentialFields).toMutableList()
+            } else {
+                groupMatches = scheduleExceptionGroups(group, minimumMatches, group.size, tournament, potentialFields).toMutableList()
+            }
+            // Add the scheduled matches at the corresponding index in matches.
+            matches.add(index, groupMatches)
+        }
+
+        val finalMatches = mutableListOf<MatchWithParticipantsDTO>()
+        var startingTime = tournament.startDate
+
+        // Pair up the groups: for each pair, assign different fields.
+        for (i in matches.indices step 2) {
+            if (i + 1 < matches.size) {
+                // For the paired groups:
+                // The group at index i gets fields[0] and fields[1]
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    listOf(potentialFields[0], potentialFields[1]),
+                    matches[i],
+                    startingTime,
+                    groups[i]
+                )
+                // The group at index i+1 gets fields[2] and fields[3]
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    listOf(potentialFields[2], potentialFields[3]),
+                    matches[i + 1],
+                    startingTime,
+                    groups[i + 1]
+                )
+            } else {
+                // For the unpaired group, use all potentialFields.
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    potentialFields,
+                    matches[i],
+                    startingTime,
+                    groups[i]
+                )
+            }
+            // Increase the starting time for the next round by 90 minutes.
+            startingTime = startingTime.plus((matchInterval * 3).minutes)
+        }
+
+        // Check that both a time and a field has been set
+        for(match in finalMatches) {
+            // Check that a time has been set
+            assertNotNull(match.time)
+
+            // Check that a field has been set
+            assertFalse { match.gameLocationId == -1 }
+        }
+
+        val matchesGroupedByStartTime = finalMatches.groupBy { it.time }.values.map { it.toList() }
+
+
+        // Check that the number of matches with the same starttime is not higher than number of fields
+        for(timeslot in matchesGroupedByStartTime) {
+            assertTrue(
+                potentialFields.size >= timeslot.size,
+                "There are more matches played at a timeslot than there are available fields"
+            )
+        }
+
+        // Check that a team is not playing two matches at the same time
+        val teamTimeMap = mutableMapOf<Instant, MutableSet<Int>>()
+
+        for (match in finalMatches) {
+            val time = match.time!!
+            val participantsFinal = match.participants
+
+            val participantsAtThisTime = teamTimeMap.getOrPut(time) { mutableSetOf() }
+
+            for (participant in participantsFinal) {
+                val participantId = participant.participant.participantId ?: -1
+                assertTrue(
+                    participantsAtThisTime.add(participantId),
+                    "Participant with ID $participantId is scheduled for more than one match at $time"
+                )
+            }
+        }
+
+        // Check that there are not two matches played on the same field at the same time
+        val fieldTimePairs = mutableSetOf<Pair<Instant, Int>>()
+        for (match in finalMatches) {
+            val key = Pair(match.time!!, match.gameLocationId)
+            assertTrue(
+                fieldTimePairs.add(key),
+                "Duplicate match scheduled at same time ${key.first} and field ${key.second}"
+            )
+        }
+
+        // Check that no match will start on the same field within the matchInterval of another
+        val fieldTimeListMap = mutableMapOf<Int, MutableList<Instant>>()
+
+        for (match in finalMatches) {
+            val fieldId = match.gameLocationId
+            val matchTime = match.time!!
+
+            val timesOnField = fieldTimeListMap.getOrPut(fieldId) { mutableListOf() }
+
+            for (scheduledTime in timesOnField) {
+                val diff = kotlin.math.abs(matchTime.minus(scheduledTime).inWholeMinutes)
+                assertTrue(
+                    diff >= matchInterval,
+                    "Two matches scheduled too close together on field $fieldId: $scheduledTime and $matchTime"
+                )
+            }
+
+            timesOnField.add(matchTime)
+        }
+
+        // Check that all the matches have been scheduled
+        assertEquals(33, finalMatches.size)
+    }
+
+    @Test
+    fun testAssigningTimeAndFieldToMatchesOneOddGroup() {
+        val participants = potentialParticipants.take(21)
+        val minimumMatches = 3
+        val standardGroupSize = 4
+        val matchInterval = tournament.matchInterval
+
+        val groups = createGroups(participants, minimumMatches)
+
+        // Keeping the group structure
+        val matches = mutableListOf<MutableList<MatchWithParticipantsDTO>>()
+        for ((index, group) in groups.withIndex()) {
+            // Schedule the matches for the current group.
+            var groupMatches = mutableListOf<MatchWithParticipantsDTO>()
+            if (group.size == standardGroupSize) {
+                groupMatches = scheduleStandardGroups(group, minimumMatches, tournament, potentialFields).toMutableList()
+            } else {
+                groupMatches = scheduleExceptionGroups(group, minimumMatches, group.size, tournament, potentialFields).toMutableList()
+            }
+            // Add the scheduled matches at the corresponding index in matches.
+            matches.add(index, groupMatches)
+        }
+
+        val finalMatches = mutableListOf<MatchWithParticipantsDTO>()
+        var startingTime = tournament.startDate
+
+        // Pair up the groups: for each pair, assign different fields.
+        for (i in matches.indices step 2) {
+            if (i + 1 < matches.size) {
+                // For the paired groups:
+                // The group at index i gets fields[0] and fields[1]
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    listOf(potentialFields[0], potentialFields[1]),
+                    matches[i],
+                    startingTime,
+                    groups[i]
+                )
+                // The group at index i+1 gets fields[2] and fields[3]
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    listOf(potentialFields[2], potentialFields[3]),
+                    matches[i + 1],
+                    startingTime,
+                    groups[i + 1]
+                )
+            } else {
+                // For the unpaired group, use all potentialFields.
+                finalMatches += assignMatchTimeAndLocation(
+                    tournament,
+                    potentialFields,
+                    matches[i],
+                    startingTime,
+                    groups[i]
+                )
+            }
+            // Increase the starting time for the next round by 90 minutes.
+            startingTime = startingTime.plus((matchInterval * 3).minutes)
+        }
+
+        // Check that both a time and a field has been set
+        for(match in finalMatches) {
+            // Check that a time has been set
+            assertNotNull(match.time)
+
+            // Check that a field has been set
+            assertFalse { match.gameLocationId == -1 }
+        }
+
+        val matchesGroupedByStartTime = finalMatches.groupBy { it.time }.values.map { it.toList() }
+
+
+        // Check that the number of matches with the same starttime is not higher than number of fields
+        for(timeslot in matchesGroupedByStartTime) {
+            assertTrue(
+                potentialFields.size >= timeslot.size,
+                "There are more matches played at a timeslot than there are available fields"
+            )
+        }
+
+        // Check that a team is not playing two matches at the same time
+        val teamTimeMap = mutableMapOf<Instant, MutableSet<Int>>()
+
+        for (match in finalMatches) {
+            val time = match.time!!
+            val participantsFinal = match.participants
+
+            val participantsAtThisTime = teamTimeMap.getOrPut(time) { mutableSetOf() }
+
+            for (participant in participantsFinal) {
+                val participantId = participant.participant.participantId ?: -1
+                assertTrue(
+                    participantsAtThisTime.add(participantId),
+                    "Participant with ID $participantId is scheduled for more than one match at $time"
+                )
+            }
+        }
+
+        // Check that there are not two matches played on the same field at the same time
+        val fieldTimePairs = mutableSetOf<Pair<Instant, Int>>()
+        for (match in finalMatches) {
+            val key = Pair(match.time!!, match.gameLocationId)
+            assertTrue(
+                fieldTimePairs.add(key),
+                "Duplicate match scheduled at same time ${key.first} and field ${key.second}"
+            )
+        }
+
+        // Check that no match will start on the same field within the matchInterval of another
+        val fieldTimeListMap = mutableMapOf<Int, MutableList<Instant>>()
+
+        for (match in finalMatches) {
+            val fieldId = match.gameLocationId
+            val matchTime = match.time!!
+
+            val timesOnField = fieldTimeListMap.getOrPut(fieldId) { mutableListOf() }
+
+            for (scheduledTime in timesOnField) {
+                val diff = kotlin.math.abs(matchTime.minus(scheduledTime).inWholeMinutes)
+                assertTrue(
+                    diff >= matchInterval,
+                    "Two matches scheduled too close together on field $fieldId: $scheduledTime and $matchTime"
+                )
+            }
+
+            timesOnField.add(matchTime)
+        }
+
+        // Check that all the matches have been scheduled
+        assertEquals(32, finalMatches.size)
+    }
 }
+
