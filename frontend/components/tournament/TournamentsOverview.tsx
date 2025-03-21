@@ -4,8 +4,14 @@ import { fetchTournaments } from "@/utils/API";
 
 
 export default async function TournamentsOverview() {
-    let tournaments: Tournament[] = await fetchTournaments();
-    console.log(tournaments);
+    
+    const tournaments: Tournament[] = await fetchTournaments();
+
+    console.log("TOURNAMENTS OVERVIEW", tournaments);
+    
+    if (!tournaments) {
+        return (<h1></h1>);
+    }
 
     return (
         <Container>

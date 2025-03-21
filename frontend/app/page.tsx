@@ -1,5 +1,8 @@
 import React from "react";
 import styles from "@/styles/page.module.css";
+
+
+
 import Image from "next/image";
 import {
   Button,
@@ -11,7 +14,8 @@ import {
   Separator,
 } from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
-import LoginDialog from "@/components/login/LogIn";
+//import LoginDialog from "@/components/login/LogIn";
+//import SignupDialog from "@/components/signUp/SignUp";
 
 export default function Page() {
   return (
@@ -58,10 +62,10 @@ export default function Page() {
 
               <Flex direction="column" gap="3">
                 <p>A tournament organizer? Create your account now.</p>
-                <Button size="3">Sign up</Button>
+           {/*      <SignupDialog />  */}
 
                 <p>Already a user?</p>
-                <LoginDialog /> 
+             {/*    <LoginDialog />  */}
 
                 <p>Just want to set up a quick tournament?</p>
                 <Button variant="outline" size="2">
