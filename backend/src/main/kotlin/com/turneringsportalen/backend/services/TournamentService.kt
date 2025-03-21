@@ -20,7 +20,6 @@ class TournamentService(private val client: SupabaseClient) {
         val tournament: Tournament? = findById(tournamentId);
 
         if(tournament == null) return emptyList();
-
         val minimumMatches = 3
         val standardGroupSize = minimumMatches + 1
         val participants = listOf(
@@ -46,7 +45,7 @@ class TournamentService(private val client: SupabaseClient) {
              Participant(20, 1, "Brann hvit"),
              Participant(21, 1, "Brann rød"),
              Participant(22, 1, "Brann svart"), */
-        );
+        )
 
         val fields = listOf(
             TournamentField(1, tournamentId, "Field A"),
@@ -55,7 +54,7 @@ class TournamentService(private val client: SupabaseClient) {
             TournamentField(4, tournamentId, "Field D")
         )
 
-        // Create groups based on minimumMatches
+        val groupSize = minimumMatches + 1
         val groups = createGroups(participants, minimumMatches)
 
         // Schedule matches per group and retain group structure
@@ -104,7 +103,7 @@ class TournamentService(private val client: SupabaseClient) {
             // Advance timeslot by 3 * matchInterval minutes
             startingTime = startingTime.plus((tournament.matchInterval * 3).minutes)
         }
-
+        
         return mapMatchesToOverviewList(finalMatches, fields)
     }
 
@@ -112,24 +111,11 @@ class TournamentService(private val client: SupabaseClient) {
         return client.from("tournament").insert(tournament){ select() }.decodeSingle<Tournament>()
     }
 
-
-    suspend fun addParticipant(participant: Participant) {
-        client.from("participant").insert(participant)
-    }
-
-    suspend fun addMatch(match: Match, participants: List<Participant>) {
-        client.from("match").insert(match)
-
-        for ((index, participant) in participants.withIndex()) {
-            client.from("match_participant").insert(MatchParticipant(match.matchId, participant.participantId ?: 0, index))
-        }
-    }
-
     suspend fun findAllTournaments(): List<Tournament>? {
         return client.from("tournament").select().decodeList<Tournament>()
     }
 
-    suspend fun findById(id: Int): Tournament? {
+    suspend fun findTournamentById(id: Int): Tournament? {
         return client.from("tournament").select {
             filter {
                 eq("tournament_id", id)
@@ -137,69 +123,10 @@ class TournamentService(private val client: SupabaseClient) {
         }.decodeSingle<Tournament>()
     }
 
-    suspend fun findMatchById(id: Int): Match? {
-        return client.from("match").select {
-            filter {
-                eq("match_id", id)
-            }
-        }.decodeSingle<Match>()
-    }
-
-    suspend fun findMatchesByTournamentId(id: Int): List<Match>? {
-        return client.from("match").select {
-            filter {
-                eq("tournament_id", id)
-            }
-        }.decodeList<Match>()
-    }
-
-    suspend fun findFieldsByTournamentId(id: Int): List<TournamentField>? {
-        return client.from("available_fields").select {
-            filter {
-                eq("tournament_id", id)
-            }
-        }.decodeList<TournamentField>()
-    }
-
-    suspend fun findParticipantById(id: Int): Match? {
-        return client.from("participant").select {
-            filter {
-                eq("participant_id", id)
-            }
-        }.decodeSingle<Match>()
-    }
-
-    suspend fun findMatchParticipantByMatchId(id: Int): List<MatchParticipant>? {
-        return client.from("match_participant").select {
-            filter {
-                eq("participant_id", id)
-            }
-        }.decodeList<MatchParticipant>()
-    }
-
-    suspend fun deleteTournament(id: Int) {     // Change supabase so if a tournament is deleted it cascades
-        // Add Exceptions for when they should fail, currently only focused on getting it working
+    suspend fun deleteTournament(id: Int) {
         client.from("tournament").delete {
             filter {
                 eq("tournament_id", id)
-            }
-        }
-    }
-
-    suspend fun deleteParticipant(id: Int) {     // Change supabase so if a tournament is deleted it cascades
-        // Add Exceptions for when they should fail, currently only focused on getting it working
-        client.from("participant").delete {
-            filter {
-                eq("participant_id", id)
-            }
-        }
-    }
-
-    suspend fun deleteMatch(id: Int) {     // Change supabase so if a tournament is deleted it cascades
-        // Add Exceptions for when they should fail, currently only focused on getting it working
-        client.from("match").delete {
-            filter {
-                eq("match_id", id)
             }
         }
     }
@@ -218,5 +145,39 @@ class TournamentService(private val client: SupabaseClient) {
                 eq("tournament_id", tournamentId)
             }
         }
+    }
+
+    // Functions for finding data from other tables relevant for a given tournament
+
+    suspend fun findMatchParticipantsByMatchId(id: Int): List<MatchParticipant>? {
+        return client.from("match_participant").select {
+            filter {
+                eq("participant_id", id)
+            }
+        }.decodeList<MatchParticipant>()
+    }
+
+    suspend fun findMatchesByTournamentId(id: Int): List<Match>? {
+        return client.from("match").select {
+            filter {
+                eq("tournament_id", id)
+            }
+        }.decodeList<Match>()
+    }
+
+    suspend fun findAllTournamentParticipants(id: Int): List<Participant>? {
+        return client.from("participant").select {
+            filter {
+                eq("tournament_id", id)
+            }
+        }.decodeList<Participant>()
+    }
+
+    suspend fun findFieldsByTournamentId(id: Int): List<TournamentField>? {
+        return client.from("available_fields").select {
+            filter {
+                eq("tournament_id", id)
+            }
+        }.decodeList<TournamentField>()
     }
 }

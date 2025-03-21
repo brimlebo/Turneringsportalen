@@ -9,7 +9,7 @@ import {
   MatchParticipant,
 } from "./types";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = "http://localhost:8080";
 
 /**
  * Method that fetches the list of tournaments from the server

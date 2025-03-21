@@ -32,8 +32,6 @@ class TournamentFieldService(private val client: SupabaseClient) {
         }
     }
 
-
-
     suspend fun updateTournamentField(tournamentField: TournamentField) {
         client.from("available_fields").update(
             {

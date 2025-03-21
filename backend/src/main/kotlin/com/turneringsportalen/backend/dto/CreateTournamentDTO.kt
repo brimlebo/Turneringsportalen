@@ -1,4 +1,4 @@
-package com.turneringsportalen.backend.daos
+package com.turneringsportalen.backend.dto
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
