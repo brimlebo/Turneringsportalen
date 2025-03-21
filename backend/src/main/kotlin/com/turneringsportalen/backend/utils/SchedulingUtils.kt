@@ -1,11 +1,14 @@
 package com.turneringsportalen.backend.utils
 
-import com.turneringsportalen.backend.dto.MatchParticipantWithParticipantDTO
-import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
+import com.turneringsportalen.backend.dto.*
 import com.turneringsportalen.backend.entities.Participant
 import com.turneringsportalen.backend.entities.Tournament
 import com.turneringsportalen.backend.entities.TournamentField
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 fun createGroups(participants: List<Participant>, minMatches: Int) : List<List<Participant>> {
     val groupSize = minMatches + 1
@@ -39,13 +42,17 @@ fun scheduleStandardGroups(group: List<Participant>, minimumMatches: Int, tourna
             val match = MatchWithParticipantsDTO(
                 matchId = matchid,
                 tournamentID = tournament.tournamentId ?: -1,
-                time = Clock.System.now(),
-                gameLocationId = fields[0].fieldId ?: -1,
+                time = null,
+                gameLocationId = -1,
                 participants = listOf(
                     MatchParticipantWithParticipantDTO(
-                        matchId = matchid, participant = group[i], index = 1
+                        matchId = matchid,
+                        participant = group[i],
+                        index = 1
                     ), MatchParticipantWithParticipantDTO(
-                        matchId = matchid, participant = group[j], index = 2
+                        matchId = matchid,
+                        participant = group[j],
+                        index = 2
                     )
                 )
             )
@@ -68,7 +75,6 @@ fun scheduleExceptionGroups(group: List<Participant>, minimumMatches: Int, group
 
     if((minimumMatches * 2) == groupSize) {
         // case when there is an even number of participants, and the group can be split in half
-        println("2x")
         matches = schedule2TimesMinimumMatches(group, minimumMatches, tournament, fields)
     }
     else {
@@ -102,8 +108,8 @@ private fun schedule2TimesMinimumMatches(group: List<Participant>, minimumMatche
                 val match = MatchWithParticipantsDTO(
                     matchId = matchid,
                     tournamentID = tournament.tournamentId ?: -1,
-                    time = Clock.System.now(),
-                    gameLocationId = fields[0].fieldId ?: -1,
+                    time = null,
+                    gameLocationId = -1,
                     participants = listOf(
                         MatchParticipantWithParticipantDTO(
                             matchId = matchid,
@@ -125,11 +131,6 @@ private fun schedule2TimesMinimumMatches(group: List<Participant>, minimumMatche
                     (matchCount[participantI.participantId] ?: 0) + 1
                 matchCount[participantJ.participantId ?: Int.MAX_VALUE] =
                     (matchCount[participantJ.participantId] ?: 0) + 1
-
-                for (count in matchCount) {
-                    println(count)
-                }
-                println()
             }
         }
     }
@@ -219,8 +220,8 @@ private fun scheduleRemainingExceptionGroups(group: List<Participant>, minimumMa
         val match = MatchWithParticipantsDTO(
             matchId = matchId,
             tournamentID = tournament.tournamentId ?: -1,
-            time = Clock.System.now(),
-            gameLocationId = fields[0].fieldId ?: -1,
+            time = null,
+            gameLocationId = -1,
             participants = listOf(
                 MatchParticipantWithParticipantDTO(
                     matchId = matchId,
@@ -241,3 +242,123 @@ private fun scheduleRemainingExceptionGroups(group: List<Participant>, minimumMa
 
     return matches
 }
+
+fun assignMatchTimeAndLocation(
+    tournament: Tournament,
+    allocatedFields: List<TournamentField>,
+    matchesInGroup: MutableList<MatchWithParticipantsDTO>,
+    startingTime: Instant,
+    group: List<Participant>
+): MutableList<MatchWithParticipantsDTO> {
+    val simultaneousMatches = minOf(group.size / 2, allocatedFields.size)
+    val matchInterval = tournament.matchInterval
+
+    var currentTime = startingTime
+    val unscheduledMatches = matchesInGroup.toMutableList()
+    val scheduledMatches = mutableListOf<MatchWithParticipantsDTO>()
+
+    // Track which participants have played at each timeslot
+    val timeslotParticipantMap = mutableMapOf<Instant, MutableSet<Int>>()
+
+    while (unscheduledMatches.isNotEmpty()) {
+        var matchesScheduledThisSlot = 0
+        val alreadyScheduledParticipants = timeslotParticipantMap.getOrPut(currentTime) { mutableSetOf() }
+
+        val iterator = unscheduledMatches.iterator()
+        val matchesThisSlot = mutableListOf<MatchWithParticipantsDTO>()
+
+        while (iterator.hasNext() && matchesScheduledThisSlot < simultaneousMatches) {
+            val match = iterator.next()
+
+            // Get participant IDs for this match
+            val participantIds = match.participants.map { it.participant.participantId }
+
+            // Check if any of the participants already have a match at this timeslot
+            if (participantIds.any { it in alreadyScheduledParticipants }) continue
+
+            // Assign time and field
+            match.time = currentTime
+            match.gameLocationId = allocatedFields[matchesScheduledThisSlot].fieldId ?: -1
+
+            // Update tracking
+            alreadyScheduledParticipants.addAll(participantIds.filterNotNull())
+            matchesThisSlot.add(match)
+            iterator.remove()
+            matchesScheduledThisSlot++
+        }
+
+        scheduledMatches += matchesThisSlot
+        currentTime = currentTime.plus(matchInterval.minutes)
+    }
+
+    return scheduledMatches
+}
+
+
+private fun addDuration(startingTime: Instant, minutesToAdd: Int): Instant {
+    return startingTime.plus(minutesToAdd.minutes)
+}
+
+fun mapMatchToOverview(
+    match: MatchWithParticipantsDTO,
+    tournamentFields: List<TournamentField>
+): MatchOverviewDTO {
+    // Find the TournamentField that matches the gameLocationId.
+    val field = tournamentFields.firstOrNull { it.fieldId == match.gameLocationId }
+    val gameLocationDTO = if (field != null) {
+        GameLocationDTO(
+            gameLocationId = field.fieldId ?: match.gameLocationId,
+            name = field.fieldName
+        )
+    } else {
+        // Fallback in case no matching field is found.
+        GameLocationDTO(
+            gameLocationId = match.gameLocationId,
+            name = "Unknown Field"
+        )
+    }
+
+    // Convert the Instant to a local date/time.
+    val localDateTime = match.time?.toLocalDateTime(TimeZone.currentSystemDefault())
+        ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+    // Format date as dd.MM (day and month)
+    val day = localDateTime.date.dayOfMonth
+    val month = localDateTime.date.monthNumber
+    val dateString = "%02d.%02d".format(day, month)
+
+    // Format time as hh:mm (hour and minute)
+    val hour = localDateTime.time.hour
+    val minute = localDateTime.time.minute
+    val timeString = "%02d:%02d".format(hour, minute)
+
+    // Map each MatchParticipantWithParticipantDTO to a SimpleParticipantDTO,
+    // sorted by their index.
+    val simpleParticipants = match.participants
+        .sortedBy { it.index }
+        .map { participantDTO ->
+            SimpleParticipantDTO(
+                participantId = participantDTO.participant.participantId,
+                name = participantDTO.participant.name
+            )
+        }
+
+    return MatchOverviewDTO(
+        matchId = match.matchId,
+        date = dateString,
+        time = timeString,
+        gameLocation = gameLocationDTO,
+        participants = simpleParticipants
+    )
+}
+
+
+
+// Mapping a list of matches:
+fun mapMatchesToOverviewList(
+    matches: List<MatchWithParticipantsDTO>,
+    tournamentFields: List<TournamentField>
+): List<MatchOverviewDTO> {
+    return matches.map { match -> mapMatchToOverview(match, tournamentFields) }
+}
+
