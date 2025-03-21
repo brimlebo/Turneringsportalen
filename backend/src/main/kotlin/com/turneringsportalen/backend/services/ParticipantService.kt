@@ -17,7 +17,6 @@ class ParticipantService(private val client: SupabaseClient) {
     }
 
     suspend fun findMatchParticipantById(id: Int): Participant? {
-
         return client.from("participant").select {
             filter {
                 eq("participant_id", id)

@@ -20,6 +20,9 @@ class TournamentController(private val service: TournamentService, private val f
     @GetMapping("/{id}")
     fun findTournamentById(@PathVariable id: Int) = runBlocking { service.findTournamentById(id) }
 
+    @GetMapping("/{id}/tournament")
+    fun findTournamentWithSchedule(@PathVariable id: Int) = runBlocking { service.findTournamentWithSchedule(id) }
+
     @PostMapping
     fun addNewTournament(@RequestBody tournamentDTO: CreateTournamentDTO) = runBlocking {
         var tournament = Tournament(

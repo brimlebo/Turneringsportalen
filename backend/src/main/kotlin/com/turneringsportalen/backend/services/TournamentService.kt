@@ -1,6 +1,8 @@
 package com.turneringsportalen.backend.services
 
 import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
+import com.turneringsportalen.backend.dto.ReturnMatchDTO
+import com.turneringsportalen.backend.dto.WholeTournamentDTO
 import com.turneringsportalen.backend.entities.*
 import com.turneringsportalen.backend.utils.createGroups
 import com.turneringsportalen.backend.utils.scheduleExceptionGroups
@@ -117,12 +119,55 @@ class TournamentService(private val client: SupabaseClient) {
 
     // Functions for finding data from other tables relevant for a given tournament
 
-    suspend fun findMatchParticipantsByMatchId(id: Int): List<MatchParticipant>? {
-        return client.from("match_participant").select {
+    // Should only be used if a tournament has passed its registration end date and/or a schedule has been set up for the given tournament
+    suspend fun findTournamentWithSchedule(id: Int): WholeTournamentDTO? {
+        val tournament = findTournamentById(id)
+        val participants = findAllTournamentParticipants(id)
+        val fields = findFieldsByTournamentId(id)
+
+        if (tournament == null || participants == null || fields == null) {
+            return null
+        }
+
+        // Change to include whole Participant object rather than MatchParticipant?
+        val matches = findMatchesByTournamentId(id)
+        val matchParticipants: MutableList<List<Participant>> = mutableListOf()
+        for (match in matches!!) {
+            findMatchParticipantsByMatchId(match.matchId)?.let { matchParticipants.add(it) }
+        }
+
+        val matchesWithParticipants = matches.zip(matchParticipants) { f1, f2 -> ReturnMatchDTO(f1, f2) }
+
+        val tournamentReturn = WholeTournamentDTO(
+            tournament,
+            participants,
+            matchesWithParticipants,
+            fields
+        )
+
+        return tournamentReturn
+    }
+
+    // Changed to return the participant objects instead of MatchParticipant
+    suspend fun findMatchParticipantsByMatchId(id: Int): List<Participant>? {
+        val matchParticipants = client.from("match_participant").select {
             filter {
                 eq("participant_id", id)
             }
         }.decodeList<MatchParticipant>()
+
+        val participants: MutableList<Participant> = mutableListOf()
+        for (mParticipant in matchParticipants) {   // Get ParticipantService and use findMatchParticipantById()?
+            val participant = client.from("participant").select {
+                filter {
+                    eq("participant_id", mParticipant.participantId)
+                }
+            }.decodeSingle<Participant>()
+
+            participants.add(participant)
+        }
+
+        return participants
     }
 
     suspend fun findMatchesByTournamentId(id: Int): List<Match>? {
