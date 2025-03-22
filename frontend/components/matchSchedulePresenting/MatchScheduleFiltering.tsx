@@ -53,25 +53,50 @@ export function MatchScheduleFiltering({
     ).values()
   );
 
-  // Initialize selectedFields and selectedParticipants with all keys
+  const times = Array.from(
+    new Set(
+      matches.flatMap((group) => group.matches.map((match) => match.time))
+    )
+  ).map((time) => ({ key: time, text: time }));
+
+  const dates = Array.from(
+    new Set(
+      matches.flatMap((group) => group.matches.map((match) => match.date))
+    )
+  ).map((date) => ({ key: date, text: date }));
+
   const [selectedFields, setSelectedFields] = useState<(string | number)[]>(
-    fields.map((field) => field.key)
+    fields.map((field) => String(field.key))
   );
 
   const [selectedParticipants, setSelectedParticipants] = useState<
     (string | number)[]
-  >(participants.map((participant) => participant.key));
+  >(participants.map((participant) => String(participant.key)));
+
+  const [selectedTimes, setSelectedTimes] = useState<(string | number)[]>(
+    times.map((time) => String(time.key))
+  );
+
+  const [selectedDates, setSelectedDates] = useState<(string | number)[]>(
+    dates.map((date) => String(date.key))
+  );
 
   const [filteredMatches, setFilteredMatches] = useState(matches);
 
   const handleFilterChange = (
     fields: (string | number)[],
-    participants: (string | number)[]
+    participants: (string | number)[],
+    times: (string | number)[],
+    dates: (string | number)[]
   ) => {
-    console.log(fields, participants);
-    if (fields.length === 0 || participants.length === 0) {
-      // If no fields or participants are selected, show no matches
-      console.log("No fields or participants selected");
+    console.log(fields, participants, times, dates);
+    if (
+      fields.length === 0 ||
+      participants.length === 0 ||
+      times.length === 0 ||
+      dates.length === 0
+    ) {
+      console.log("empty");
       setFilteredMatches([]);
       return;
     }
@@ -87,24 +112,56 @@ export function MatchScheduleFiltering({
             ) ||
               participants.includes(
                 String(match.participants[1].participant_id ?? 0)
-              ))
+              )) &&
+            times.includes(String(match.time)) &&
+            dates.includes(String(match.date))
         ),
       }))
-      .filter((group) => group.matches.length > 0); // Remove empty groups
+      .filter((group) => group.matches.length > 0);
 
     setFilteredMatches(newFilteredMatches);
   };
 
   const handleFieldSelectionChange = (selectedKeys: (string | number)[]) => {
     setSelectedFields(selectedKeys);
-    handleFilterChange(selectedKeys, selectedParticipants);
+    handleFilterChange(
+      selectedKeys,
+      selectedParticipants,
+      selectedTimes,
+      selectedDates
+    );
   };
 
   const handleParticipantSelectionChange = (
     selectedKeys: (string | number)[]
   ) => {
     setSelectedParticipants(selectedKeys);
-    handleFilterChange(selectedFields, selectedKeys);
+    handleFilterChange(
+      selectedFields,
+      selectedKeys,
+      selectedTimes,
+      selectedDates
+    );
+  };
+
+  const handleTimeSelectionChange = (selectedKeys: (string | number)[]) => {
+    setSelectedTimes(selectedKeys);
+    handleFilterChange(
+      selectedFields,
+      selectedParticipants,
+      selectedKeys,
+      selectedDates
+    );
+  };
+
+  const handleDateSelectionChange = (selectedKeys: (string | number)[]) => {
+    setSelectedDates(selectedKeys);
+    handleFilterChange(
+      selectedFields,
+      selectedParticipants,
+      selectedTimes,
+      selectedKeys
+    );
   };
 
   return (
@@ -119,6 +176,16 @@ export function MatchScheduleFiltering({
           triggerText="Select participants"
           items={participants}
           onSelectionChange={handleParticipantSelectionChange}
+        />
+        <MultiSelect
+          triggerText="Select times"
+          items={times}
+          onSelectionChange={handleTimeSelectionChange}
+        />
+        <MultiSelect
+          triggerText="Select dates"
+          items={dates}
+          onSelectionChange={handleDateSelectionChange}
         />
       </Flex>
       <Table.Root>
