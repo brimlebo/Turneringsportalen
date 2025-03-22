@@ -73,4 +73,10 @@ class TournamentController(private val service: TournamentService, private val f
     fun findFieldsByTournamentId(@PathVariable id: Int) = runBlocking {
         service.findFieldsByTournamentId(id)
     }
+
+    // Trigger the scheduling algorithm for a tournament
+    @PostMapping("/{id}/schedule")
+    fun createTournamentSchedule(@PathVariable id: Int) = runBlocking {
+        service.setUpMatches(id)
+    }
 }

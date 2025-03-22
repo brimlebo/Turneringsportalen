@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Match(
-    @SerialName("match_id") val matchId: Int,
+    @SerialName("match_id") val matchId: Int? = null,
     @SerialName("tournament_id") val tournamentId: Int,
     @SerialName("time") @Serializable(with = InstantIso8601Serializer::class) val time: Instant,
     @SerialName("game_location_id") val gameLocationId: Int
@@ -27,7 +27,7 @@ data class Match(
     }
 
     override fun hashCode(): Int {
-        var result = matchId
+        var result = matchId ?: 1
         result = 31 * result + tournamentId
         result = 31 * result + time.hashCode()
         result = 31 * result + gameLocationId

@@ -299,7 +299,7 @@ private fun addDuration(startingTime: Instant, minutesToAdd: Int): Instant {
     return startingTime.plus(minutesToAdd.minutes)
 }
 
-fun mapMatchToOverview(
+private fun mapMatchToOverview(
     match: MatchWithParticipantsDTO,
     tournamentFields: List<TournamentField>
 ): MatchOverviewDTO {

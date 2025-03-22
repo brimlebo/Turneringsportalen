@@ -11,7 +11,8 @@ data class Tournament(
     val name: String,
     @SerialName("start_date") @Serializable(with = InstantIso8601Serializer::class) val startDate: Instant,
     val location: String,
-    @SerialName("match_interval") val matchInterval: Int
+    @SerialName("match_interval") val matchInterval: Int,
+    @SerialName("minimum_matches") val minimumMatches: Int? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

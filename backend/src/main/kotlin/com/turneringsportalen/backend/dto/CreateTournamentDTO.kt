@@ -10,7 +10,8 @@ data class CreateTournamentDTO(
     @SerialName("start_date") val startDate: Instant,
     val location: String,
     @SerialName("match_interval") val matchInterval: Int,
-    @SerialName("field_names") val fieldNames: List<String> = emptyList() // Ensure it has a default value
+    @SerialName("field_names") val fieldNames: List<String> = emptyList(), // Ensure it has a default value
+    @SerialName("minimum_matches") val minimumMatches: Int? = null
 ) {
     override fun toString(): String {
         return "CreateTournamentDTO(name='$name', startDate=$startDate, location='$location', matchInterval=$matchInterval, fieldNames=$fieldNames)"
