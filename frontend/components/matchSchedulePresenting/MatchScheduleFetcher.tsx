@@ -1,6 +1,6 @@
 import { test } from "@/utils/API";
 import { MatchOverviewDTO } from "@/utils/types";
-import { MatchScheduleTable } from "./MatchScheduleTable";
+import { MatchScheduleFiltering } from "./MatchScheduleFiltering";
 
 export async function MatchScheduleFetcher() {
   const data = await test();
@@ -34,12 +34,5 @@ export async function MatchScheduleFetcher() {
   // Sort by date and time
   matchesArray.sort((a, b) => a.timeKey.localeCompare(b.timeKey));
 
-  matchesArray.forEach((group) => {
-    console.log(group.timeKey);
-    group.matches.forEach((match) => {
-      console.log(match);
-    });
-  });
-
-  return <MatchScheduleTable matches={matchesArray} />;
+  return <MatchScheduleFiltering matches={matchesArray} />;
 }
