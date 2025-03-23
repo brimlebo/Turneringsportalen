@@ -13,9 +13,15 @@ type MatchScheduleFilteringProps = {
   }[];
 };
 
+/**
+ * Component that filters match data based on selected fields, participants, times, and dates
+ * @param object containing the matches defined in the MatchScheduleFilteringProps type
+ * @returns a component that contains filters and a table of matches
+ */
 export function MatchScheduleFiltering({
   matches,
 }: MatchScheduleFilteringProps) {
+  // Create a list of unique fields
   const fields = Array.from(
     new Map(
       matches.flatMap((group) =>
@@ -30,6 +36,7 @@ export function MatchScheduleFiltering({
     ).values()
   );
 
+  // Create a list of unique participants
   const participants = Array.from(
     new Map(
       matches.flatMap((group) =>
@@ -53,36 +60,50 @@ export function MatchScheduleFiltering({
     ).values()
   );
 
+  // Create a list of unique times
   const times = Array.from(
     new Set(
       matches.flatMap((group) => group.matches.map((match) => match.time))
     )
   ).map((time) => ({ key: time, text: time }));
 
+  // Create a list of unique dates
   const dates = Array.from(
     new Set(
       matches.flatMap((group) => group.matches.map((match) => match.date))
     )
   ).map((date) => ({ key: date, text: date }));
 
+  // State to keep track of selected fields
   const [selectedFields, setSelectedFields] = useState<(string | number)[]>(
     fields.map((field) => String(field.key))
   );
 
+  // State to keep track of selected participants
   const [selectedParticipants, setSelectedParticipants] = useState<
     (string | number)[]
   >(participants.map((participant) => String(participant.key)));
 
+  // State to keep track of selected times
   const [selectedTimes, setSelectedTimes] = useState<(string | number)[]>(
     times.map((time) => String(time.key))
   );
 
+  // State to keep track of selected dates
   const [selectedDates, setSelectedDates] = useState<(string | number)[]>(
     dates.map((date) => String(date.key))
   );
 
+  // State to keep track of filtered matches
   const [filteredMatches, setFilteredMatches] = useState(matches);
 
+  /**
+   * Handle the change of filters and update the filtered matches
+   * @param fields selected fields
+   * @param participants selected participants
+   * @param times selected times
+   * @param dates selected dates
+   */
   const handleFilterChange = (
     fields: (string | number)[],
     participants: (string | number)[],
@@ -122,6 +143,10 @@ export function MatchScheduleFiltering({
     setFilteredMatches(newFilteredMatches);
   };
 
+  /**
+   * Handle the change of selected fields and update the filtered matches
+   * @param selectedKeys selected field keys
+   */
   const handleFieldSelectionChange = (selectedKeys: (string | number)[]) => {
     setSelectedFields(selectedKeys);
     handleFilterChange(
@@ -132,6 +157,10 @@ export function MatchScheduleFiltering({
     );
   };
 
+  /**
+   * Handle the change of selected participants and update the filtered matches
+   * @param selectedKeys selected participant keys
+   */
   const handleParticipantSelectionChange = (
     selectedKeys: (string | number)[]
   ) => {
@@ -144,6 +173,10 @@ export function MatchScheduleFiltering({
     );
   };
 
+  /**
+   * Handle the change of selected times and update the filtered matches
+   * @param selectedKeys selected time keys
+   */
   const handleTimeSelectionChange = (selectedKeys: (string | number)[]) => {
     setSelectedTimes(selectedKeys);
     handleFilterChange(
@@ -154,6 +187,10 @@ export function MatchScheduleFiltering({
     );
   };
 
+  /**
+   * Handle the change of selected dates and update the filtered matches
+   * @param selectedKeys selected date keys
+   */
   const handleDateSelectionChange = (selectedKeys: (string | number)[]) => {
     setSelectedDates(selectedKeys);
     handleFilterChange(
