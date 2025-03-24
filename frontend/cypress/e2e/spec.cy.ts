@@ -5,8 +5,8 @@ describe('Test connection to site', () => {
   })
 })
 
-
 /* 
+TODO: Implement login flow test
 describe('Login Flow', () => {
   it('should allow a user to log in', () => {
     cy.visit('/login'); 
