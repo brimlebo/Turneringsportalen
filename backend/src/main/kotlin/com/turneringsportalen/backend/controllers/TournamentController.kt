@@ -6,6 +6,8 @@ import com.turneringsportalen.backend.entities.TournamentField
 import com.turneringsportalen.backend.services.TournamentFieldService
 import com.turneringsportalen.backend.services.TournamentService
 import kotlinx.coroutines.runBlocking
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -21,7 +23,14 @@ class TournamentController(private val service: TournamentService, private val f
     fun findTournamentById(@PathVariable id: Int) = runBlocking { service.findTournamentById(id) }
 
     @GetMapping("/{id}/tournament")
-    fun findTournamentWithSchedule(@PathVariable id: Int) = runBlocking { service.findTournamentWithSchedule(id) }
+    fun findTournamentWithSchedule(@PathVariable id: Int) = runBlocking {
+        try {
+            val tournament = service.findTournamentWithSchedule(id)
+            ResponseEntity(tournament, HttpStatus.OK)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+    }
 
     @PostMapping
     fun addNewTournament(@RequestBody tournamentDTO: CreateTournamentDTO) = runBlocking {

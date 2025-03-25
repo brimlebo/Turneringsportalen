@@ -11,8 +11,11 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
+// Import other services here so their functions can be used in the "main" service?
 @Service
 class TournamentService(private val client: SupabaseClient) {
 
@@ -120,19 +123,19 @@ class TournamentService(private val client: SupabaseClient) {
     // Functions for finding data from other tables relevant for a given tournament
 
     // Should only be used if a tournament has passed its registration end date and/or a schedule has been set up for the given tournament
-    suspend fun findTournamentWithSchedule(id: Int): WholeTournamentDTO? {
+    suspend fun findTournamentWithSchedule(id: Int): ResponseEntity<WholeTournamentDTO> {
         val tournament = findTournamentById(id)
         val participants = findAllTournamentParticipants(id)
         val fields = findFieldsByTournamentId(id)
 
-        if (tournament == null || participants == null || fields == null) {
-            return null
+        val matches = findMatchesByTournamentId(id)
+
+        if (tournament == null || participants == null || fields == null || matches == null) {
+            throw IllegalArgumentException("Does not exist, or schedule has not been created")
         }
 
-        // Change to include whole Participant object rather than MatchParticipant?
-        val matches = findMatchesByTournamentId(id)
         val matchParticipants: MutableList<List<Participant>> = mutableListOf()
-        for (match in matches!!) {
+        for (match in matches) {
             findMatchParticipantsByMatchId(match.matchId)?.let { matchParticipants.add(it) }
         }
 
@@ -145,7 +148,7 @@ class TournamentService(private val client: SupabaseClient) {
             fields
         )
 
-        return tournamentReturn
+        return ResponseEntity(tournamentReturn, HttpStatus.OK)
     }
 
     // Changed to return the participant objects instead of MatchParticipant
