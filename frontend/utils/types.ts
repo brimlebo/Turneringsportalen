@@ -67,4 +67,15 @@ export type GameLocationDTO = {
 export type SimpleParticipantDTO = {
   participant_id?: number;
   name: string;
+}
+
+export type CreateUserDTO = {
+  email: string;
+  password: string;
+  //username: string;
+};
+
+export type LoginUserDTO = {
+  email: string;
+  password: string;
 };

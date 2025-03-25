@@ -1,13 +1,16 @@
 "use client";
 
-import { login } from "@/app/login/actions";
-import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
+import { signup } from "@/app/login/actions";
+import { Button, Dialog, Flex, Text, TextField, RadioGroup } from "@radix-ui/themes";
+
 import { useState } from "react";
 
-export default function LoginDialog() {
+export default function SignupDialog() {
   const [inputFields, setInputFields] = useState({
     email: "",
     password: "",
+    username: "",
+    role: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,28 +19,32 @@ export default function LoginDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Form data
     const formData = new FormData();
     formData.append("email", inputFields.email);
     formData.append("password", inputFields.password);
+    formData.append("username", inputFields.username);
+    formData.append("role", inputFields.role);
 
     
     //Call to authentication logic here
-    await login(formData);
+    await signup(formData);
 
-    console.log("Login attempt with:", inputFields.email, inputFields.password);
+
+    // TODO: Add authentication logic here
+    console.log("Sign up attempt with:", inputFields.email, inputFields.password, inputFields.username, inputFields.role);
   };
 
   return (
     <Dialog.Root>
       <Dialog.Trigger>
-        <Button variant="outline" size="3">Log in</Button>
+        <Button size="3">Sign up</Button>
       </Dialog.Trigger>
       <Dialog.Content style={{ maxWidth: "450px" }}>
-        <Dialog.Title>Log in to Turneringsportalen</Dialog.Title>
+        <Dialog.Title>Sign up</Dialog.Title>
         <Dialog.Description size="2" mb="4">
-          Enter your credentials to access your account.
+          Create an account to create and administer tournaments.
         </Dialog.Description>
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
@@ -48,10 +55,10 @@ export default function LoginDialog() {
               <TextField.Root
                 type="email"
                 id="user_email"
-                name = "email"
+                name="email"
                 value={inputFields.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder="Email"
               />
             </label>
             <label>
@@ -64,9 +71,39 @@ export default function LoginDialog() {
                 name="password"
                 value={inputFields.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder="Password"
               />
             </label>
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                Username
+              </Text>
+              <TextField.Root
+                type="text"
+                id="username"
+                name="username"
+                value={inputFields.username}
+                onChange={handleChange}
+                placeholder="Username"
+              />
+            </label>
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                Role
+              </Text>
+              <RadioGroup.Root
+                name="role"
+                defaultValue="regular_user"
+                onValueChange={(value) => setInputFields({ ...inputFields, role: value })}
+              >
+                <RadioGroup.Item value="regular_user">Users</RadioGroup.Item>
+                <RadioGroup.Item value="team_leader">Team leaders</RadioGroup.Item>
+                <RadioGroup.Item value="event_organizer">Organizers</RadioGroup.Item>
+              </RadioGroup.Root>
+            </label>
+
+
+
           </Flex>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
@@ -74,7 +111,7 @@ export default function LoginDialog() {
                 Cancel
               </Button>
             </Dialog.Close>
-            <Button type="submit">Log in</Button>
+            <Button type="submit">Sign up</Button>
           </Flex>
         </form>
       </Dialog.Content>
