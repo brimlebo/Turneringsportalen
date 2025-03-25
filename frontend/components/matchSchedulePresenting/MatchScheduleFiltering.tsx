@@ -7,11 +7,15 @@ import { useState } from "react";
 import { MultiSelect } from "../MultiSelect";
 
 type MatchScheduleFilteringProps = {
-  matches: {
-    timeKey: string;
-    matches: MatchOverviewDTO[];
-  }[];
+  matches: MatchOverviewDTO[];
 };
+
+interface FilterStates {
+  fields: (string | number)[];
+  participants: (string | number)[];
+  times: (string | number)[];
+  dates: (string | number)[];
+}
 
 /**
  * Component that filters match data based on selected fields, participants, times, and dates
@@ -21,185 +25,278 @@ type MatchScheduleFilteringProps = {
 export function MatchScheduleFiltering({
   matches,
 }: MatchScheduleFilteringProps) {
-  // Create a list of unique fields
-  const fields = Array.from(
-    new Map(
-      matches.flatMap((group) =>
-        group.matches.map((match) => [
-          match.game_location.game_location_id,
-          {
-            key: match.game_location.game_location_id,
-            text: match.game_location.name,
-          },
-        ])
-      )
-    ).values()
-  );
-
-  // Create a list of unique participants
-  const participants = Array.from(
-    new Map(
-      matches.flatMap((group) =>
-        group.matches.flatMap((match) => [
-          [
-            match.participants[0].participant_id ?? 0,
-            {
-              key: match.participants[0].participant_id ?? 0,
-              text: match.participants[0].name,
-            },
-          ],
-          [
-            match.participants[1].participant_id ?? 0,
-            {
-              key: match.participants[1].participant_id ?? 0,
-              text: match.participants[1].name,
-            },
-          ],
-        ])
-      )
-    ).values()
-  );
-
-  // Create a list of unique times
-  const times = Array.from(
-    new Set(
-      matches.flatMap((group) => group.matches.map((match) => match.time))
-    )
-  ).map((time) => ({ key: time, text: time }));
-
-  // Create a list of unique dates
-  const dates = Array.from(
-    new Set(
-      matches.flatMap((group) => group.matches.map((match) => match.date))
-    )
-  ).map((date) => ({ key: date, text: date }));
-
-  // State to keep track of selected fields
-  const [selectedFields, setSelectedFields] = useState<(string | number)[]>(
-    fields.map((field) => String(field.key))
-  );
-
-  // State to keep track of selected participants
-  const [selectedParticipants, setSelectedParticipants] = useState<
-    (string | number)[]
-  >(participants.map((participant) => String(participant.key)));
-
-  // State to keep track of selected times
-  const [selectedTimes, setSelectedTimes] = useState<(string | number)[]>(
-    times.map((time) => String(time.key))
-  );
-
-  // State to keep track of selected dates
-  const [selectedDates, setSelectedDates] = useState<(string | number)[]>(
-    dates.map((date) => String(date.key))
-  );
+  // Select the grouping of matches
+  const [groupedMatches, setGroupedMatches] = useState(groupByTime());
 
   // State to keep track of filtered matches
-  const [filteredMatches, setFilteredMatches] = useState(matches);
+  const [filteredMatches, setFilteredMatches] =
+    useState<MatchOverviewDTO[][]>(groupedMatches);
 
-  /**
-   * Handle the change of filters and update the filtered matches
-   * @param fields selected fields
-   * @param participants selected participants
-   * @param times selected times
-   * @param dates selected dates
-   */
-  const handleFilterChange = (
-    fields: (string | number)[],
-    participants: (string | number)[],
-    times: (string | number)[],
-    dates: (string | number)[]
-  ) => {
-    console.log(fields, participants, times, dates);
+  // Create initial filter items
+  const fields = Array.from(
+    new Map(
+      matches.map((match) => [
+        match.game_location.game_location_id,
+        {
+          key: match.game_location.game_location_id,
+          text: match.game_location.name,
+        },
+      ])
+    ).values()
+  ).sort((a, b) => a.text.localeCompare(b.text));
+
+  const participants = Array.from(
+    new Map(
+      matches.flatMap((match) => [
+        [
+          match.participants[0].participant_id ?? 0,
+          {
+            key: match.participants[0].participant_id ?? 0,
+            text: match.participants[0].name,
+          },
+        ],
+        [
+          match.participants[1].participant_id ?? 0,
+          {
+            key: match.participants[1].participant_id ?? 0,
+            text: match.participants[1].name,
+          },
+        ],
+      ])
+    ).values()
+  ).sort((a, b) => {
+    return a.text.localeCompare(b.text, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+
+  const times = Array.from(new Set(matches.map((match) => match.time)))
+    .sort()
+    .map((time) => ({ key: time, text: time }));
+
+  const dates = Array.from(new Set(matches.map((match) => match.date)))
+    .sort()
+    .map((date) => ({ key: date, text: date }));
+
+  // Object containing the selected filter states
+  const [filterStates, setFilterStates] = useState<FilterStates>({
+    fields: fields.map((field) => String(field.key)),
+    participants: participants.map((participant) => String(participant.key)),
+    times: times.map((time) => String(time.key)),
+    dates: dates.map((date) => String(date.key)),
+  });
+
+  const handleFilterChange = (newFilterStates: FilterStates) => {
     if (
-      fields.length === 0 ||
-      participants.length === 0 ||
-      times.length === 0 ||
-      dates.length === 0
+      newFilterStates.fields.length === 0 ||
+      newFilterStates.participants.length === 0 ||
+      newFilterStates.times.length === 0 ||
+      newFilterStates.dates.length === 0
     ) {
-      console.log("empty");
       setFilteredMatches([]);
       return;
     }
 
-    const newFilteredMatches = matches
-      .map((group) => ({
-        ...group,
-        matches: group.matches.filter(
+    const newFilteredMatches = groupedMatches
+      .map((group) =>
+        group.filter(
           (match) =>
-            fields.includes(String(match.game_location.game_location_id)) &&
-            (participants.includes(
+            newFilterStates.fields.includes(
+              String(match.game_location.game_location_id)
+            ) &&
+            (newFilterStates.participants.includes(
               String(match.participants[0].participant_id ?? 0)
             ) ||
-              participants.includes(
+              newFilterStates.participants.includes(
                 String(match.participants[1].participant_id ?? 0)
               )) &&
-            times.includes(String(match.time)) &&
-            dates.includes(String(match.date))
-        ),
-      }))
-      .filter((group) => group.matches.length > 0);
+            newFilterStates.times.includes(String(match.time)) &&
+            newFilterStates.dates.includes(String(match.date))
+        )
+      )
+      .filter((group) => group.length > 0);
 
     setFilteredMatches(newFilteredMatches);
   };
 
-  /**
-   * Handle the change of selected fields and update the filtered matches
-   * @param selectedKeys selected field keys
-   */
   const handleFieldSelectionChange = (selectedKeys: (string | number)[]) => {
-    setSelectedFields(selectedKeys);
-    handleFilterChange(
-      selectedKeys,
-      selectedParticipants,
-      selectedTimes,
-      selectedDates
-    );
+    const newFilterStates = {
+      ...filterStates,
+      fields: selectedKeys,
+    };
+    setFilterStates(newFilterStates);
+    handleFilterChange(newFilterStates);
   };
 
-  /**
-   * Handle the change of selected participants and update the filtered matches
-   * @param selectedKeys selected participant keys
-   */
   const handleParticipantSelectionChange = (
     selectedKeys: (string | number)[]
   ) => {
-    setSelectedParticipants(selectedKeys);
-    handleFilterChange(
-      selectedFields,
-      selectedKeys,
-      selectedTimes,
-      selectedDates
-    );
+    const newFilterStates = {
+      ...filterStates,
+      participants: selectedKeys,
+    };
+    setFilterStates(newFilterStates);
+    handleFilterChange(newFilterStates);
   };
 
-  /**
-   * Handle the change of selected times and update the filtered matches
-   * @param selectedKeys selected time keys
-   */
   const handleTimeSelectionChange = (selectedKeys: (string | number)[]) => {
-    setSelectedTimes(selectedKeys);
-    handleFilterChange(
-      selectedFields,
-      selectedParticipants,
-      selectedKeys,
-      selectedDates
-    );
+    const newFilterStates = {
+      ...filterStates,
+      times: selectedKeys,
+    };
+    setFilterStates(newFilterStates);
+    handleFilterChange(newFilterStates);
   };
 
-  /**
-   * Handle the change of selected dates and update the filtered matches
-   * @param selectedKeys selected date keys
-   */
   const handleDateSelectionChange = (selectedKeys: (string | number)[]) => {
-    setSelectedDates(selectedKeys);
-    handleFilterChange(
-      selectedFields,
-      selectedParticipants,
-      selectedTimes,
-      selectedKeys
-    );
+    const newFilterStates = {
+      ...filterStates,
+      dates: selectedKeys,
+    };
+    setFilterStates(newFilterStates);
+    handleFilterChange(newFilterStates);
   };
+
+  function updateGrouping(newGrouping: "time" | "date" | "field") {
+    let newGroupedMatches: MatchOverviewDTO[][];
+
+    switch (newGrouping) {
+      case "time":
+        newGroupedMatches = groupByTime();
+        break;
+      case "date":
+        newGroupedMatches = groupByDate();
+        break;
+      case "field":
+        newGroupedMatches = groupByField();
+        break;
+      default:
+        newGroupedMatches = groupByTime();
+        break;
+    }
+
+    setGroupedMatches(newGroupedMatches);
+
+    // update filtered matches based on new grouping
+    // done here because if using the old filtered matches, the grouping is one click behind
+    const newFilteredMatches = newGroupedMatches
+      .map((group) =>
+        group.filter(
+          (match) =>
+            filterStates.fields.includes(
+              String(match.game_location.game_location_id)
+            ) &&
+            (filterStates.participants.includes(
+              String(match.participants[0].participant_id ?? 0)
+            ) ||
+              filterStates.participants.includes(
+                String(match.participants[1].participant_id ?? 0)
+              )) &&
+            filterStates.times.includes(String(match.time)) &&
+            filterStates.dates.includes(String(match.date))
+        )
+      )
+      .filter((group) => group.length > 0);
+
+    setFilteredMatches(newFilteredMatches);
+  }
+
+  function groupByTime(): MatchOverviewDTO[][] {
+    // Group matches by time
+    const groupedMatches = matches.reduce(
+      (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
+        const timeKey = `${match.date} ${match.time}`;
+        if (!groups[timeKey]) {
+          groups[timeKey] = [];
+        }
+        groups[timeKey].push(match);
+        return groups;
+      },
+      {}
+    );
+
+    // Convert to array of arrays and sort matches within each group by game_location_id
+    const matchesArray = Object.values(groupedMatches).map((matches) =>
+      matches.sort(
+        (a, b) =>
+          a.game_location.game_location_id - b.game_location.game_location_id
+      )
+    );
+
+    // Sort groups by date and time
+    matchesArray.sort((a, b) => {
+      const timeA = `${a[0].date} ${a[0].time}`;
+      const timeB = `${b[0].date} ${b[0].time}`;
+      return timeA.localeCompare(timeB);
+    });
+
+    return matchesArray;
+  }
+
+  function groupByField(): MatchOverviewDTO[][] {
+    // Group matches by field
+    const groupedMatches = matches.reduce(
+      (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
+        const fieldKey = String(match.game_location.game_location_id);
+        if (!groups[fieldKey]) {
+          groups[fieldKey] = [];
+        }
+        groups[fieldKey].push(match);
+        return groups;
+      },
+      {}
+    );
+
+    // Convert to array of arrays and sort matches within each group by time
+    const matchesArray = Object.values(groupedMatches).map((matches) =>
+      matches.sort((a, b) => {
+        const timeA = `${a.date} ${a.time}`;
+        const timeB = `${b.date} ${b.time}`;
+        return timeA.localeCompare(timeB);
+      })
+    );
+
+    // Sort groups by field name
+    matchesArray.sort((a, b) =>
+      a[0].game_location.name.localeCompare(b[0].game_location.name)
+    );
+
+    return matchesArray;
+  }
+
+  function groupByDate(): MatchOverviewDTO[][] {
+    // Group matches by date
+    const groupedMatches = matches.reduce(
+      (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
+        if (!groups[match.date]) {
+          groups[match.date] = [];
+        }
+        groups[match.date].push(match);
+        return groups;
+      },
+      {}
+    );
+
+    // Convert to array of arrays and sort matches within each group
+    const matchesArray = Object.values(groupedMatches).map((matches) =>
+      matches.sort((a, b) => {
+        // First sort by time
+        const timeComparison = a.time.localeCompare(b.time);
+        if (timeComparison !== 0) return timeComparison;
+
+        // If times are equal, sort by game_location_id
+        return (
+          a.game_location.game_location_id - b.game_location.game_location_id
+        );
+      })
+    );
+
+    // Sort groups by date
+    matchesArray.sort((a, b) => a[0].date.localeCompare(b[0].date));
+
+    return matchesArray;
+  }
 
   return (
     <div>
@@ -228,11 +325,26 @@ export function MatchScheduleFiltering({
       <Table.Root>
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Time</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell
+              style={{ cursor: "pointer" }}
+              onClick={() => updateGrouping("time")}
+            >
+              Time
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Participant 1</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Participant 2</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Location</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell
+              style={{ cursor: "pointer" }}
+              onClick={() => updateGrouping("date")}
+            >
+              Date
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell
+              style={{ cursor: "pointer" }}
+              onClick={() => updateGrouping("field")}
+            >
+              Location
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

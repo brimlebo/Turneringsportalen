@@ -2,15 +2,12 @@ import { MatchOverviewDTO } from "@/utils/types";
 import { Table } from "@radix-ui/themes";
 
 type MatchScheduleTableProps = {
-  matches: {
-    timeKey: string;
-    matches: MatchOverviewDTO[];
-  }[];
+  matches: MatchOverviewDTO[][];
 };
 
 export function MatchScheduleTable({ matches }: MatchScheduleTableProps) {
   return matches.flatMap((group, groupIndex) => [
-    ...group.matches.map((match) => (
+    ...group.map((match) => (
       <Table.Row key={match.match_id}>
         <Table.Cell>{match.time}</Table.Cell>
         <Table.Cell>{match.participants[0].name}</Table.Cell>

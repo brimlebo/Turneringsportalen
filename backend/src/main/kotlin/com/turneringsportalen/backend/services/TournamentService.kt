@@ -12,7 +12,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.annotations.Async
 import org.springframework.stereotype.Service
 import kotlin.time.Duration.Companion.minutes
 
@@ -171,9 +170,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
         val savedMatch = client.from("match").insert(match){ select() }.decodeSingle<Match>()
 
         for ((index, participant) in participants.withIndex()) {
-            if (savedMatch != null) {
-                client.from("match_participant").insert(MatchParticipant(savedMatch.matchId, participant.participantId ?: 0, index))
-            }
+            client.from("match_participant").insert(MatchParticipant(savedMatch.matchId, participant.participantId ?: 0, index))
         }
     }
 
