@@ -28,6 +28,12 @@ describe('CreateTournament.cy.tsx', () => {
     cy.contains('button', 'Use keyword and number').click()
     cy.get('input').eq(6).type('Arena')
     cy.get('input').eq(6).should('have.value', 'Arena')
-    //cy.contains('button', 'Save').click() need backend to answer response
+
+    cy.intercept('POST', '/tournaments', {
+      statusCode: 200,
+      body: { success: true }
+    }).as('Save')
+    cy.contains('button', 'Save').click()
+    cy.wait('@Save').its('response.statusCode').should('eq', 200)
   })
 })
