@@ -28,7 +28,6 @@ class MatchController(private val service: MatchService){
         service.createMatch(match)
     }
 
-
     @PutMapping("/{id}")
     fun updateMatch(@PathVariable id: Int, @RequestBody match: Match) = runBlocking{
         service.update(

@@ -50,3 +50,16 @@ export type CreateTournamentDTO = {
   field_names: string[];
   match_interval: number;
 };
+
+
+export type CreateUserDTO = {
+  email: string;
+  password: string;
+  //username: string;
+};
+
+
+export type LoginUserDTO = {
+  email: string;
+  password: string;
+};

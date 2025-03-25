@@ -5,8 +5,8 @@ import { Flex, Section, Separator } from '@radix-ui/themes';
 
 export default function Footer() {
   return (
-    <Section style={{ 
-      textAlign: 'center', 
+    <Section style={{
+      textAlign: 'center',
       padding: '2rem',
       marginTop: 'auto',
       color: 'var(--gray-8)',
@@ -23,6 +23,12 @@ export default function Footer() {
         <Separator size="4" orientation="vertical" style={{ backgroundColor: 'var(--gray-8)' }} />
         <p>© 2024 Turneringsportalen</p>
       </Flex>
+      <p style={{
+          marginTop: '1rem',
+          fontSize: '0.7rem'
+      }}>
+          Version: {process.env.NEXT_PUBLIC_GIT_SHA || 'development'}
+      </p>
     </Section>
   );
 }

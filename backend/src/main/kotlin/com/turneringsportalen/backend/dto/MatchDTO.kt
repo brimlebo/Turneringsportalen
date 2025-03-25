@@ -10,4 +10,4 @@ data class MatchDTO(
    @SerialName("tournament_id") val tournamentId : Int,
    val time : Instant,
    @SerialName("game_location_id") val gameLocationId: Int
-   )
+)

@@ -1,6 +1,5 @@
 package com.turneringsportalen.backend.dto
 
-import com.turneringsportalen.backend.entities.MatchParticipant
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 

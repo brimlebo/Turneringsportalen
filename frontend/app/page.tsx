@@ -1,5 +1,8 @@
 import React from "react";
 import styles from "@/styles/page.module.css";
+
+
+
 import Image from "next/image";
 import {
   Button,
@@ -12,8 +15,19 @@ import {
 } from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
 import LoginDialog from "@/components/login/LogIn";
+import SignupDialog from "@/components/signUp/SignUp";
+import { createClient } from "@/utils/supabase/server";
 
-export default function Page() {
+import SignupDialogCardUser from "@/components/signUp/signupCardUser";
+import SignupDialogCardTeamleader from "@/components/signUp/signupCardTeammanager";
+import SignupDialogCardOrganizer from "@/components/signUp/signupCardOrganizer";
+
+export default async function Page() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  
   return (
     <>
       <Container size="4" style={{ minHeight: "100vh", paddingRight: "calc(var(--scrollbar-width, 15px))", overflow: "hidden" }}>
@@ -55,21 +69,56 @@ export default function Page() {
               </Box>
 
               <Separator size="4" />
+              {user ? (
+                <Flex direction="column" gap="3">
+                  <p>Welcome back, {user?.user_metadata.username}</p>
+                  <Button variant="outline" size="2">
+                    Create a tournament
+                  </Button>
+                </Flex>
+              ) : (
+                <Flex direction="column" gap="3">
+                  <p>Already a user?</p>
+                  <LoginDialog />
 
-              <Flex direction="column" gap="3">
+                  <p>Are you an event organizer?</p>
+                  <p>Do you manage a team?</p>
+                  <p>Or just want to track tournaments?</p>
+                  <p>Create your account now.</p>
+                  
+
+                </Flex>
+              )}
+{/*               <Flex direction="column" gap="3">
                 <p>A tournament organizer? Create your account now.</p>
-                <Button size="3">Sign up</Button>
+                <SignupDialog />
 
                 <p>Already a user?</p>
-                <LoginDialog /> 
+                <LoginDialog />  
 
                 <p>Just want to set up a quick tournament?</p>
                 <Button variant="outline" size="2">
                   Click here
                 </Button>
-              </Flex>
+              </Flex> */}
             </Flex>
           </Flex>
+          
+          {!user ? (
+            <Box>
+                <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
+                  Sign up, and create an account as a:
+                </h2>
+              <Grid columns="3" gap="4" rows="1">
+                <SignupDialogCardUser />
+                <SignupDialogCardTeamleader />
+                <SignupDialogCardOrganizer />
+              </Grid>
+            </Box>
+          ) : (
+            <></>
+          )}
+
 
           {/* Scroll Indicator */}
           <Box style={{ textAlign: "center" }}>
