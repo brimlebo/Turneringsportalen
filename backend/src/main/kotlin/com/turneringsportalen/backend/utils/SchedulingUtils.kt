@@ -294,11 +294,6 @@ fun assignMatchTimeAndLocation(
     return scheduledMatches
 }
 
-
-private fun addDuration(startingTime: Instant, minutesToAdd: Int): Instant {
-    return startingTime.plus(minutesToAdd.minutes)
-}
-
 private fun mapMatchToOverview(
     match: MatchWithParticipantsDTO,
     tournamentFields: List<TournamentField>
@@ -351,8 +346,6 @@ private fun mapMatchToOverview(
         participants = simpleParticipants
     )
 }
-
-
 
 // Mapping a list of matches:
 fun mapMatchesToOverviewList(
