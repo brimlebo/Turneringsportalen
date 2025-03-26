@@ -22,7 +22,6 @@ export default function CreateTournamentView() {
         <p>Here is the tournament creation form</p>
         <CreateTournamentForm />
       </div>
-  
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { login } from "@/app/login/actions";
+import { login } from "@/components/login/actions";
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 

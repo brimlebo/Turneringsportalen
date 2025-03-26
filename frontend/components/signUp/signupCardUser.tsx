@@ -1,8 +1,6 @@
 "use client";
-
-import { signup } from "@/app/login/actions";
+import { signup } from "@/components/login/actions";
 import { Button, Dialog, Flex, Text, TextField, RadioGroup, Card, Box, Inset, Strong } from "@radix-ui/themes";
-
 import { useState } from "react";
 
 export default function SignupDialogCardUser() {
@@ -26,10 +24,8 @@ export default function SignupDialogCardUser() {
     formData.append("username", inputFields.username);
     formData.append("role", "regular_user");
 
-
     //Call to authentication logic here
     await signup(formData);
-
 
     // TODO: Add authentication logic here
     console.log("Sign up attempt with:", inputFields.email, inputFields.password, inputFields.username, formData);
@@ -40,10 +36,10 @@ export default function SignupDialogCardUser() {
       <Dialog.Trigger>
         <Box>
           <Card>
-            <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
-              User
-            </h2>
             
+            <Text as="p" size="7" weight="bold" mb="2" align="center">
+              User
+            </Text>
             <img
               src="/spectator.png"
               alt="Bold typography"
@@ -59,7 +55,6 @@ export default function SignupDialogCardUser() {
             </Text>
           </Card>
         </Box>
-
       </Dialog.Trigger>
       <Dialog.Content style={{ maxWidth: "450px" }}>
         <Dialog.Title>Sign up</Dialog.Title>
@@ -120,9 +115,6 @@ export default function SignupDialogCardUser() {
                 <RadioGroup.Item value="event_organizer" disabled>Event Organizer</RadioGroup.Item>
               </RadioGroup.Root>
             </label>
-
-
-
           </Flex>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
