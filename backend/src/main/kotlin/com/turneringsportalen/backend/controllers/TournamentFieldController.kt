@@ -5,10 +5,8 @@ import com.turneringsportalen.backend.services.TournamentFieldService
 import kotlinx.coroutines.runBlocking
 import org.springframework.web.bind.annotation.*
 
-
 @RestController
 @RequestMapping("/available_fields")
-@CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600) // Restrict to frontend
 class TournamentFieldController(private val service: TournamentFieldService) {
 
     @GetMapping

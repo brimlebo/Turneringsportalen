@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/tournaments")
-@CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600) // Restrict to frontend
 class TournamentController(private val service: TournamentService, private val fieldService: TournamentFieldService) {
 
     // May have to return a ResponseEntity here => ResponseEntity(service.findAllTournaments(), HttpStatus.OK)
