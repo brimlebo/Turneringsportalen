@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.RestController
 class TestController(private val service: TournamentService) {
 
     @GetMapping
-    fun test() = runBlocking { service.setUpMatches(1) }
+    fun test() = runBlocking { service.getSchedule(31) }
 }

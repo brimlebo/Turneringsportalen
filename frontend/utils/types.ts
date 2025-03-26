@@ -51,13 +51,29 @@ export type CreateTournamentDTO = {
   match_interval: number;
 };
 
+export type MatchOverviewDTO = {
+  match_id?: number;
+  date: string;
+  time: string;
+  game_location: GameLocationDTO;
+  participants: SimpleParticipantDTO[];
+};
+
+export type GameLocationDTO = {
+  game_location_id: number;
+  name: string;
+};
+
+export type SimpleParticipantDTO = {
+  participant_id?: number;
+  name: string;
+}
 
 export type CreateUserDTO = {
   email: string;
   password: string;
   //username: string;
 };
-
 
 export type LoginUserDTO = {
   email: string;

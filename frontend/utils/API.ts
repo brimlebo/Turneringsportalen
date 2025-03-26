@@ -2,10 +2,13 @@
  * This file contains the functions to communicate with the server
  */
 
-//import { redirect } from "next/navigation";
+import {
+  CreateTournamentDTO,
+  Match,
+  MatchOverviewDTO,
+  MatchParticipant,
+} from "./types";
 import { createClient } from "./supabase/server";
-import { CreateTournamentDTO } from "./types";
-
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -72,4 +75,17 @@ export async function createTournament(data: CreateTournamentDTO) {
   if (!response.ok) {
     throw new Error("Failed to create tournament");
   }
+}
+
+// TESTING, VERY TEMPORARY
+export async function test(): Promise<MatchOverviewDTO[]> {
+  const response = await fetch(`${API_URL}/test`, {
+    method: "GET",
+    cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+  return data;
 }

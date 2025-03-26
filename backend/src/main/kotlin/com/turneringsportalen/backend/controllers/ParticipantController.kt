@@ -19,7 +19,6 @@ class ParticipantController(private val service: ParticipantService) {
     @PostMapping
     fun addNewParticipant(@RequestBody participantDTO : ParticipantDTO) = runBlocking {
         val participant = Participant(
-            participantId = participantDTO.participantId,
             tournamentId = participantDTO.tournamentId,
             name = participantDTO.name
         )
