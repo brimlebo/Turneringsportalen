@@ -1,6 +1,6 @@
 "use client";
 
-import { signup } from "@/app/login/actions";
+import { signup } from "@/components/login/actions";
 import { Button, Dialog, Flex, Text, TextField, RadioGroup, Card, Box, Inset, Strong } from "@radix-ui/themes";
 
 import { useState } from "react";

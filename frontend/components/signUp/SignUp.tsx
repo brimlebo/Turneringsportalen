@@ -1,6 +1,6 @@
 "use client";
 
-import { signup } from "@/app/login/actions";
+import { signup } from "@/components/login/actions";
 import { Button, Dialog, Flex, Text, TextField, RadioGroup } from "@radix-ui/themes";
 
 import { useState } from "react";
@@ -27,10 +27,8 @@ export default function SignupDialog() {
     formData.append("username", inputFields.username);
     formData.append("role", inputFields.role);
 
-    
     //Call to authentication logic here
     await signup(formData);
-
 
     // TODO: Add authentication logic here
     console.log("Sign up attempt with:", inputFields.email, inputFields.password, inputFields.username, inputFields.role);
@@ -101,9 +99,6 @@ export default function SignupDialog() {
                 <RadioGroup.Item value="event_organizer">Organizers</RadioGroup.Item>
               </RadioGroup.Root>
             </label>
-
-
-
           </Flex>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>

@@ -1,13 +1,11 @@
 'use client'
 
-import { signOutAction } from '@/app/login/actions';
+import { signOutAction } from '@/components/login/actions';
 import { Box, TabNav, Flex, Card, Text, Avatar, Button } from '@radix-ui/themes';
 import { User } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
-import { Label } from 'radix-ui';
 import React from 'react';
 import LoginDialog from './login/LogIn';
-
 
 export default function Nav({ user }: { user: User | null }) {
   const pathname = usePathname();
@@ -69,9 +67,9 @@ export default function Nav({ user }: { user: User | null }) {
                 <a href="/login">Log in</a>
               </Button> */}
               <LoginDialog />
-              <Button size="2" variant={"classic"}>
+              {/*<Button size="2" variant={"classic"}> MIGHT BE USED LATER FOR SIGN UP PAGE
                 <a href="/">Sign up</a>
-              </Button>
+              </Button>*/}
             </Flex>
           </Box>
         )}

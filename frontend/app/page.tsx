@@ -1,8 +1,4 @@
 import React from "react";
-import styles from "@/styles/page.module.css";
-
-
-
 import Image from "next/image";
 import {
   Button,
@@ -12,12 +8,12 @@ import {
   Grid,
   Section,
   Separator,
+  Link,
 } from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
 import LoginDialog from "@/components/login/LogIn";
 import SignupDialog from "@/components/signUp/SignUp";
 import { createClient } from "@/utils/supabase/server";
-
 import SignupDialogCardUser from "@/components/signUp/signupCardUser";
 import SignupDialogCardTeamleader from "@/components/signUp/signupCardTeammanager";
 import SignupDialogCardOrganizer from "@/components/signUp/signupCardOrganizer";
@@ -72,24 +68,23 @@ export default async function Page() {
               {user ? (
                 <Flex direction="column" gap="3">
                   <p>Welcome back, {user?.user_metadata.username}</p>
-                  <Button variant="outline" size="2">
+                  <Link href="/tournaments/create">
+                  <Button variant="outline" size="3">
                     Create a tournament
                   </Button>
+                  </Link>
                 </Flex>
               ) : (
                 <Flex direction="column" gap="3">
                   <p>Already a user?</p>
                   <LoginDialog />
-
                   <p>Are you an event organizer?</p>
                   <p>Do you manage a team?</p>
                   <p>Or just want to track tournaments?</p>
                   <p>Create your account now.</p>
-                  
-
                 </Flex>
               )}
-{/*               <Flex direction="column" gap="3">
+            {/* <Flex direction="column" gap="3">
                 <p>A tournament organizer? Create your account now.</p>
                 <SignupDialog />
 
