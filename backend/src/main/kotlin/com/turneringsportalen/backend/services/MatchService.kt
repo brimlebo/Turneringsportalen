@@ -1,8 +1,6 @@
 package com.turneringsportalen.backend.services
 
 import com.turneringsportalen.backend.entities.Match
-import com.turneringsportalen.backend.entities.MatchParticipant
-import com.turneringsportalen.backend.entities.Participant
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.datetime.Instant
