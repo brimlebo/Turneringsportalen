@@ -1,16 +1,13 @@
 package com.turneringsportalen.backend.controllers
 
-
 import com.turneringsportalen.backend.dto.MatchParticipantDTO
 import com.turneringsportalen.backend.entities.MatchParticipant
 import com.turneringsportalen.backend.services.MatchParticipantService
 import kotlinx.coroutines.runBlocking
 import org.springframework.web.bind.annotation.*
 
-
 @RestController
 @RequestMapping("/matchparticipant")
-@CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600)
 class MatchParticipantController(private val service: MatchParticipantService) {
 
     @GetMapping("/{id}")
