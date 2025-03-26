@@ -3,7 +3,6 @@ package com.turneringsportalen.backend.services
 import com.turneringsportalen.backend.dto.GameLocationDTO
 import com.turneringsportalen.backend.dto.MatchOverviewDTO
 import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
-import com.turneringsportalen.backend.dto.ReturnMatchDTO
 import com.turneringsportalen.backend.dto.WholeTournamentDTO
 import com.turneringsportalen.backend.dto.SimpleParticipantDTO
 import com.turneringsportalen.backend.entities.*
@@ -24,13 +23,13 @@ class TournamentService(private val client: SupabaseClient, private val particip
     // Function for the overarching algorithm of the app, automatically setting up a match schedule given a tournament, participants and playing fields exist.
     // Gives back a list of matches so that the webpage can display them and so that changes might be made
     suspend fun setUpMatches(tournamentId: Int): List<MatchOverviewDTO> {
-        val tournament: Tournament = findTournamentById(tournamentId) ?: return emptyList();
+        val tournament: Tournament = findTournamentById(tournamentId) ?: return emptyList()
 
         val minimumMatches = tournament.minimumMatches ?: 0
         val standardGroupSize = minimumMatches + 1
-        val participants = findAllTournamentParticipants(tournamentId) ?: return emptyList();
+        val participants = findAllTournamentParticipants(tournamentId) ?: return emptyList()
 
-        val fields = findFieldsByTournamentId(tournamentId) ?: return emptyList();
+        val fields = findFieldsByTournamentId(tournamentId) ?: return emptyList()
 
         val groups = createGroups(participants, minimumMatches)
 
@@ -45,7 +44,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             matchesPerGroup.add(index, groupMatches)
         }
 
-        // Assign time and field per pair of groups
+        // Assign time and field for each pair of groups
         val finalMatches = mutableListOf<MatchWithParticipantsDTO>()
         var startingTime = tournament.startDate
 
@@ -146,20 +145,12 @@ class TournamentService(private val client: SupabaseClient, private val particip
         val fields = findFieldsByTournamentId(id)
             ?: throw Exception("No fields")
 
-        val matches = findMatchesByTournamentId(id)
-            ?: throw Exception("No matches/schedule")
-
-        val matchParticipants: MutableList<List<Participant>> = mutableListOf()
-        for (match in matches) {
-            findMatchParticipantsByMatchId(match.matchId)?.let { matchParticipants.add(it) }
-        }
-
-        val matchesWithParticipants = matches.zip(matchParticipants) { f1, f2 -> ReturnMatchDTO(f1, f2) }
+        val schedule = getSchedule(id)
 
         val tournamentReturn = WholeTournamentDTO(
             tournament,
             participants,
-            matchesWithParticipants,
+            schedule,
             fields
         )
 
@@ -229,9 +220,9 @@ class TournamentService(private val client: SupabaseClient, private val particip
         val schedule = mutableListOf<MatchOverviewDTO>()
 
         for (match in matches) {
-            val matchParticipants = findMatchParticipantsByMatchId(match.matchId ?: -1) ?: listOf()
+            val matchParticipants = match.matchId?.let { findMatchParticipantsByMatchId(it) } ?: listOf()
             val participantsDTO = matchParticipants.mapNotNull { matchParticipant ->
-                val participant = participantsService.findMatchParticipantById(matchParticipant.participantId)
+                val participant = matchParticipant.participantId?.let { participantsService.findParticipantById(it) }
                 participant?.let {
                     SimpleParticipantDTO(
                         participantId = matchParticipant.participantId,
@@ -241,8 +232,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             }.toMutableList()
 
             // Convert the Instant to a local date/time.
-            val localDateTime = match.time?.toLocalDateTime(TimeZone.currentSystemDefault())
-                ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val localDateTime = match.time.toLocalDateTime(TimeZone.currentSystemDefault())
 
             // Format date as dd.MM (day and month)
             val day = localDateTime.date.dayOfMonth
