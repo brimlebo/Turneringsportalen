@@ -1,5 +1,6 @@
 "use client";
 
+import { login } from "@/app/login/actions";
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { useState } from "react";
 
@@ -15,7 +16,16 @@ export default function LoginDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add authentication logic here
+    
+    // Form data
+    const formData = new FormData();
+    formData.append("email", inputFields.email);
+    formData.append("password", inputFields.password);
+
+    
+    //Call to authentication logic here
+    await login(formData);
+
     console.log("Login attempt with:", inputFields.email, inputFields.password);
   };
 

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/tournaments")
-@CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600) // Restrict to frontend
 class TournamentController(private val service: TournamentService, private val fieldService: TournamentFieldService) {
 
     @GetMapping
@@ -76,4 +75,10 @@ class TournamentController(private val service: TournamentService, private val f
 
     @GetMapping("/{id}/fields")
     fun findFieldsByTournamentId(@PathVariable id: Int) = runBlocking { service.findFieldsByTournamentId(id) }
+
+    // Trigger the scheduling algorithm for a tournament
+    @PostMapping("/{id}/schedule")
+    fun createTournamentSchedule(@PathVariable id: Int) = runBlocking {
+        service.setUpMatches(id)
+    }
 }

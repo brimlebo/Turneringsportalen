@@ -2,24 +2,42 @@
  * This file contains the functions to communicate with the server
  */
 
-import { CreateTournamentDTO, Match, MatchParticipant } from "./types";
+import {
+  CreateTournamentDTO,
+  Match,
+  MatchOverviewDTO,
+  MatchParticipant,
+} from "./types";
+import { createClient } from "./supabase/server";
 
-const API_URL = "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * Method that fetches the list of tournaments from the server
  * @returns The list of tournaments
  */
 export async function fetchTournaments() {
-  const response = await fetch(`${API_URL}/tournaments`, {
-    method: "GET",
-    cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await response.json();
-  return data;
+  try {
+    const supabase = await createClient();
+    const token = ((await supabase.auth.getSession()).data.session?.access_token)
+    const response = await fetch(`${API_URL}/tournaments`, {
+      method: "GET",
+      cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+
+      throw new Error(`Fetch error: ${response.status}`)
+    }
+    const data = await response.json();
+    return data;
+  } catch (error: any) {
+    console.error("An error Occured: ", error)
+  } 
+  
 }
 
 /**
@@ -49,6 +67,7 @@ export async function createTournament(data: CreateTournamentDTO) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+
     },
     body: JSON.stringify(data),
   });
@@ -56,4 +75,17 @@ export async function createTournament(data: CreateTournamentDTO) {
   if (!response.ok) {
     throw new Error("Failed to create tournament");
   }
+}
+
+// TESTING, VERY TEMPORARY
+export async function test(): Promise<MatchOverviewDTO[]> {
+  const response = await fetch(`${API_URL}/test`, {
+    method: "GET",
+    cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await response.json();
+  return data;
 }

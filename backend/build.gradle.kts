@@ -1,8 +1,8 @@
 plugins {
-	kotlin("jvm") version "2.1.10"
+	kotlin("jvm") version "2.1.20"
 	kotlin("plugin.spring") version "2.1.10"
-	kotlin("plugin.serialization") version "2.1.10"
-	id("org.springframework.boot") version "3.4.3"
+	kotlin("plugin.serialization") version "2.1.20"
+	id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -24,7 +24,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.2"))
+	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.3"))
 	implementation("io.github.jan-tennert.supabase:postgrest-kt")
 
 	implementation("io.ktor:ktor-client-cio:3.1.1")
@@ -35,7 +35,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	// Allows for easier api testing
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 }
 
 kotlin {
