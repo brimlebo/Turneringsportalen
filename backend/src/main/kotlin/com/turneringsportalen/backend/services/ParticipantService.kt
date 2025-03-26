@@ -16,7 +16,7 @@ class ParticipantService(private val client: SupabaseClient) {
         return client.from("participant").select().decodeList<Participant>()
     }
 
-    suspend fun findMatchParticipantById(id: Int): Participant? {
+    suspend fun findParticipantById(id: Int): Participant? {
         return client.from("participant").select {
             filter {
                 eq("participant_id", id)

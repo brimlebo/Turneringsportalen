@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*
 @CrossOrigin(origins = ["http://localhost:3000"], maxAge = 3600) // Restrict to frontend
 class TournamentController(private val service: TournamentService, private val fieldService: TournamentFieldService) {
 
-    // May have to return a ResponseEntity here => ResponseEntity(service.findAllTournaments(), HttpStatus.OK)
     @GetMapping
     fun findAllTournaments() = runBlocking { service.findAllTournaments() }
 
@@ -27,7 +26,7 @@ class TournamentController(private val service: TournamentService, private val f
         try {
             val tournament = service.findTournamentWithSchedule(id)
             ResponseEntity(tournament, HttpStatus.OK)
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
     }
@@ -67,22 +66,14 @@ class TournamentController(private val service: TournamentService, private val f
 
     // Get data from other tables for a specific tournament
     @GetMapping("/{matchId}/participants")
-    fun findMatchParticipantsByMatchId(@PathVariable matchId: Int) = runBlocking {
-        service.findMatchParticipantsByMatchId(matchId)
-    }
+    fun findMatchParticipantsByMatchId(@PathVariable matchId: Int) = runBlocking { service.findMatchParticipantsByMatchId(matchId) }
 
     @GetMapping("/{id}/matches")
-    fun findMatchesByTournamentId(@PathVariable id: Int) = runBlocking {
-        service.findMatchesByTournamentId(id)
-    }
+    fun findMatchesByTournamentId(@PathVariable id: Int) = runBlocking { service.findMatchesByTournamentId(id) }
 
     @GetMapping("/{id}/participants")
-    fun findParticipantsByTournamentId(@PathVariable id: Int) = runBlocking{
-        service.findAllTournamentParticipants(id)
-    }
+    fun findParticipantsByTournamentId(@PathVariable id: Int) = runBlocking { service.findAllTournamentParticipants(id) }
 
     @GetMapping("/{id}/fields")
-    fun findFieldsByTournamentId(@PathVariable id: Int) = runBlocking {
-        service.findFieldsByTournamentId(id)
-    }
+    fun findFieldsByTournamentId(@PathVariable id: Int) = runBlocking { service.findFieldsByTournamentId(id) }
 }

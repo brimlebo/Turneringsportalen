@@ -15,7 +15,7 @@ class ParticipantController(private val service: ParticipantService) {
     fun findAllParticipants() = runBlocking { service.findAllParticipants() }
 
     @GetMapping("/{id}")
-    fun findParticipantById(@PathVariable id: Int) = runBlocking { service.findMatchParticipantById(id) }
+    fun findParticipantById(@PathVariable id: Int) = runBlocking { service.findParticipantById(id) }
 
     @PostMapping
     fun addNewParticipant(@RequestBody participantDTO : ParticipantDTO) = runBlocking {
