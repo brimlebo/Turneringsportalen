@@ -49,6 +49,7 @@ export type CreateTournamentDTO = {
   location: string;
   field_names: string[];
   match_interval: number;
+  minimum_matches: number;
 };
 
 export type MatchOverviewDTO = {
@@ -67,7 +68,7 @@ export type GameLocationDTO = {
 export type SimpleParticipantDTO = {
   participant_id?: number;
   name: string;
-}
+};
 
 export type CreateUserDTO = {
   email: string;
