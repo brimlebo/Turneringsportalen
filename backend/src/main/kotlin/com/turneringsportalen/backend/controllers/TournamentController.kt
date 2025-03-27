@@ -19,10 +19,7 @@ class TournamentController(private val service: TournamentService, private val f
     fun findAllTournaments() = runBlocking { service.findAllTournaments() }
 
     @GetMapping("/{id}")
-    fun findTournamentById(@PathVariable id: Int) = runBlocking { service.findTournamentById(id) }
-
-    @GetMapping("/{id}/tournament")
-    fun findTournamentWithSchedule(@PathVariable id: Int) = runBlocking {
+    fun findTournamentById(@PathVariable id: Int) = runBlocking {
         try {
             val tournament = service.findTournamentWithSchedule(id)
             ResponseEntity(tournament, HttpStatus.OK)

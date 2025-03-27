@@ -140,7 +140,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             ?: throw Exception("No tournament")
 
         val participants = findAllTournamentParticipants(id)
-            ?: throw Exception("No participants")
+            ?: emptyList()
 
         val fields = findFieldsByTournamentId(id)
             ?: throw Exception("No fields")

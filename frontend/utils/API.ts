@@ -7,6 +7,7 @@ import {
   Match,
   MatchOverviewDTO,
   MatchParticipant,
+  WholeTournamentDTO,
 } from "./types";
 import { createClient } from "./supabase/server";
 
@@ -16,7 +17,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  * Method that fetches the list of tournaments from the server
  * @returns The list of tournaments
  */
-export async function fetchTournaments() {
+export async function fetchTournaments(): Promise<WholeTournamentDTO> {
   try {
     const supabase = await createClient();
     const token = (await supabase.auth.getSession()).data.session?.access_token;
@@ -35,6 +36,7 @@ export async function fetchTournaments() {
     return data;
   } catch (error: any) {
     console.error("An error Occured: ", error);
+    return Promise.reject(error.message);
   }
 }
 

@@ -80,3 +80,10 @@ export type LoginUserDTO = {
   email: string;
   password: string;
 };
+
+export type WholeTournamentDTO = {
+  tournament: Tournament;
+  participants: Participant[];
+  schedule: MatchOverviewDTO[];
+  field_names: TournamentField[];
+};
