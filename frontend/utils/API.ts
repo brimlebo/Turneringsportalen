@@ -17,7 +17,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  * Method that fetches the list of tournaments from the server
  * @returns The list of tournaments
  */
-export async function fetchTournaments(): Promise<WholeTournamentDTO> {
+export async function fetchTournaments() {
   try {
     const supabase = await createClient();
     const token = (await supabase.auth.getSession()).data.session?.access_token;
@@ -45,7 +45,9 @@ export async function fetchTournaments(): Promise<WholeTournamentDTO> {
  * @param id The id of the tournament to fetch
  * @returns The tournament with the given id
  */
-export async function fetchTournamentById(id: number) {
+export async function fetchTournamentById(
+  id: number
+): Promise<WholeTournamentDTO> {
   const response = await fetch(`${API_URL}/tournaments/${id}`, {
     method: "GET",
     cache: "no-store", // TEMP FOR TESTING
