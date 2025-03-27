@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/participant")
 class ParticipantController(private val service: ParticipantService) {
 
-    @GetMapping()
+    @GetMapping
     fun findAllParticipants() = runBlocking { service.findAllParticipants() }
 
     @GetMapping("/{id}")
-    fun findParticipantById(@PathVariable id: Int) = runBlocking { service.findMatchParticipantById(id) }
+    fun findParticipantById(@PathVariable id: Int) = runBlocking { service.findParticipantById(id) }
 
     @PostMapping
     fun addNewParticipant(@RequestBody participantDTO : ParticipantDTO) = runBlocking {

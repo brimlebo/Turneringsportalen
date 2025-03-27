@@ -34,7 +34,7 @@ fun createGroups(participants: List<Participant>, minMatches: Int) : List<List<P
 fun scheduleStandardGroups(group: List<Participant>, minimumMatches: Int, tournament: Tournament, fields: List<TournamentField>) : List<MatchWithParticipantsDTO> {
     // Implementation
     val groupSize = minimumMatches + 1
-    var matchid = 0;
+    var matchid = 0
     val matches = mutableListOf<MatchWithParticipantsDTO>()
 
     for (i in group.indices) {

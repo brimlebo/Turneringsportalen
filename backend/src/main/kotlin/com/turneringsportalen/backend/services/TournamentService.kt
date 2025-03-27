@@ -3,6 +3,7 @@ package com.turneringsportalen.backend.services
 import com.turneringsportalen.backend.dto.GameLocationDTO
 import com.turneringsportalen.backend.dto.MatchOverviewDTO
 import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
+import com.turneringsportalen.backend.dto.WholeTournamentDTO
 import com.turneringsportalen.backend.dto.SimpleParticipantDTO
 import com.turneringsportalen.backend.entities.*
 import com.turneringsportalen.backend.utils.*
@@ -15,19 +16,20 @@ import kotlinx.datetime.toLocalDateTime
 import org.springframework.stereotype.Service
 import kotlin.time.Duration.Companion.minutes
 
+// Import other services here so their functions can be used in the "main" service?
 @Service
 class TournamentService(private val client: SupabaseClient, private val participantsService: ParticipantService) {
 
     // Function for the overarching algorithm of the app, automatically setting up a match schedule given a tournament, participants and playing fields exist.
     // Gives back a list of matches so that the webpage can display them and so that changes might be made
     suspend fun setUpMatches(tournamentId: Int): List<MatchOverviewDTO> {
-        val tournament: Tournament = findTournamentById(tournamentId) ?: return emptyList();
+        val tournament: Tournament = findTournamentById(tournamentId) ?: return emptyList()
 
         val minimumMatches = tournament.minimumMatches ?: 0
         val standardGroupSize = minimumMatches + 1
-        val participants = findAllTournamentParticipants(tournamentId) ?: return emptyList();
+        val participants = findAllTournamentParticipants(tournamentId) ?: return emptyList()
 
-        val fields = findFieldsByTournamentId(tournamentId) ?: return emptyList();
+        val fields = findFieldsByTournamentId(tournamentId) ?: return emptyList()
 
         val groups = createGroups(participants, minimumMatches)
 
@@ -42,7 +44,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             matchesPerGroup.add(index, groupMatches)
         }
 
-        // Assign time and field per pair of groups
+        // Assign time and field for each pair of groups
         val finalMatches = mutableListOf<MatchWithParticipantsDTO>()
         var startingTime = tournament.startDate
 
@@ -132,12 +134,48 @@ class TournamentService(private val client: SupabaseClient, private val particip
 
     // Functions for finding data from other tables relevant for a given tournament
 
-    suspend fun findMatchParticipantsByMatchId(id: Int): List<MatchParticipant>? {
-        return client.from("match_participant").select {
+    // Should only be used if a tournament has passed its registration end date and/or a schedule has been set up for the given tournament
+    suspend fun findTournamentWithSchedule(id: Int): WholeTournamentDTO? {
+        val tournament = findTournamentById(id)
+            ?: throw Exception("No tournament")
+
+        val participants = findAllTournamentParticipants(id)
+            ?: throw Exception("No participants")
+
+        val fields = findFieldsByTournamentId(id)
+            ?: throw Exception("No fields")
+
+        val schedule = getSchedule(id)
+
+        val tournamentReturn = WholeTournamentDTO(
+            tournament,
+            participants,
+            schedule,
+            fields
+        )
+
+        return tournamentReturn
+    }
+
+    suspend fun findMatchParticipantsByMatchId(id: Int): List<Participant>? {
+        val matchParticipants = client.from("match_participant").select {
             filter {
                 eq("match_id", id)
             }
         }.decodeList<MatchParticipant>()
+
+        val participants: MutableList<Participant> = mutableListOf()
+        for (mParticipant in matchParticipants) {   // Get ParticipantService and use findMatchParticipantById()?
+            val participant = client.from("participant").select {
+                filter {
+                    eq("participant_id", mParticipant.participantId)
+                }
+            }.decodeSingle<Participant>()
+
+            participants.add(participant)
+        }
+
+        return participants
     }
 
     suspend fun findMatchesByTournamentId(id: Int): List<Match>? {
@@ -182,9 +220,9 @@ class TournamentService(private val client: SupabaseClient, private val particip
         val schedule = mutableListOf<MatchOverviewDTO>()
 
         for (match in matches) {
-            val matchParticipants = findMatchParticipantsByMatchId(match.matchId ?: -1) ?: listOf()
+            val matchParticipants = match.matchId?.let { findMatchParticipantsByMatchId(it) } ?: listOf()
             val participantsDTO = matchParticipants.mapNotNull { matchParticipant ->
-                val participant = participantsService.findMatchParticipantById(matchParticipant.participantId)
+                val participant = matchParticipant.participantId?.let { participantsService.findParticipantById(it) }
                 participant?.let {
                     SimpleParticipantDTO(
                         participantId = matchParticipant.participantId,
@@ -194,8 +232,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             }.toMutableList()
 
             // Convert the Instant to a local date/time.
-            val localDateTime = match.time?.toLocalDateTime(TimeZone.currentSystemDefault())
-                ?: Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val localDateTime = match.time.toLocalDateTime(TimeZone.currentSystemDefault())
 
             // Format date as dd.MM (day and month)
             val day = localDateTime.date.dayOfMonth

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
-
+import styles from "@/styles/page.module.css";
 import { createClient } from '@/utils/supabase/server'
 import { Badge, Code, DataList, Flex, IconButton, Link } from '@radix-ui/themes'
 import { CopyIcon } from '@radix-ui/react-icons'
-
 
 export default async function PrivatePage() {
     const supabase = await createClient()
@@ -15,7 +14,7 @@ export default async function PrivatePage() {
     const user = data.user;
 
     return (
-        <div>
+        <div className={styles.container}>
             <p>Hello {user.email}</p>
             <DataList.Root>
                 <DataList.Item align="center">
