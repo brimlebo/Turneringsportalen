@@ -25,7 +25,8 @@ class TournamentController(private val service: TournamentService, private val f
             name = tournamentDTO.name,
             startDate = tournamentDTO.startDate,
             location = tournamentDTO.location,
-            matchInterval = tournamentDTO.matchInterval
+            matchInterval = tournamentDTO.matchInterval,
+            minimumMatches = tournamentDTO.minimumMatches
         )
         tournament = service.createTournament(tournament)
         for (fieldName in tournamentDTO.fieldNames) {
