@@ -50,7 +50,6 @@ export async function fetchTournamentById(
 ): Promise<WholeTournamentDTO> {
   const response = await fetch(`${API_URL}/tournaments/${id}`, {
     method: "GET",
-    cache: "no-store", // TEMP FOR TESTING
     headers: {
       "Content-Type": "application/json",
     },
@@ -78,15 +77,22 @@ export async function createTournament(data: CreateTournamentDTO) {
   }
 }
 
-// TESTING, VERY TEMPORARY
-export async function test(): Promise<MatchOverviewDTO[]> {
-  const response = await fetch(`${API_URL}/test`, {
-    method: "GET",
-    cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await response.json();
-  return data;
+/**
+ * Function to send a POST request to the server to create the match schedule
+ * @param tournament_id The id of the tournament
+ */
+export async function createMatchSchedule(tournament_id: number) {
+  const response = await fetch(
+    `${API_URL}/tournaments/${tournament_id}/schedule`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to create match schedule");
+  }
 }
