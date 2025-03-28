@@ -2,7 +2,7 @@
 
 import { signup } from "@/components/login/actions";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { Button, Dialog, Flex, Text, TextField, RadioGroup, HoverCard, Link, Avatar, Box, Heading, Callout } from "@radix-ui/themes";
+import { Button, Dialog, Flex, Text, TextField, RadioGroup, HoverCard, Avatar, Box, Heading, Callout } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 
 export default function SignUp() {
@@ -24,7 +24,6 @@ export default function SignUp() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputFields({ ...inputFields, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" }); // Clear error when user starts typing
-    //validateForm();
   };
 
   useEffect(() => {
