@@ -179,7 +179,7 @@ export default function SignUp() {
                         Team manager
                       </Heading>
                       <Text as="div" size="2">
-                        This account type will allow you to create and manage teams. You cal also register your teams for available tournaments.
+                        This account type will allow you to create and manage teams. You can also register your teams for available tournaments.
                       </Text>
                       </Box>
                     </Flex>
