@@ -82,6 +82,11 @@ export type LoginUserDTO = {
   password: string;
 };
 
+export type CreateParticipantDTO = {
+  tournament_id: number;
+  name: string;
+};
+
 export type WholeTournamentDTO = {
   tournament: Tournament;
   participants: Participant[];
