@@ -33,6 +33,6 @@ class JwtUtil(
             .setSigningKey(getSigningKey())
             .build()
             .parseClaimsJws(token)
-            .body
+            .payload
     }
 }
