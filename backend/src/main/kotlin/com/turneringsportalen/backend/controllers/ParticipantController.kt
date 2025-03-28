@@ -1,6 +1,6 @@
 package com.turneringsportalen.backend.controllers
 
-import com.turneringsportalen.backend.dto.ParticipantDTO
+import com.turneringsportalen.backend.dto.CreateParticipantDTO
 import com.turneringsportalen.backend.entities.Participant
 import com.turneringsportalen.backend.services.ParticipantService
 import kotlinx.coroutines.runBlocking
@@ -17,7 +17,7 @@ class ParticipantController(private val service: ParticipantService) {
     fun findParticipantById(@PathVariable id: Int) = runBlocking { service.findParticipantById(id) }
 
     @PostMapping
-    fun addNewParticipant(@RequestBody participantDTO : ParticipantDTO) = runBlocking {
+    fun addNewParticipant(@RequestBody participantDTO : CreateParticipantDTO) = runBlocking {
         val participant = Participant(
             tournamentId = participantDTO.tournamentId,
             name = participantDTO.name

@@ -1,5 +1,5 @@
 export type Tournament = {
-  tournament_id: number;
+  tournamentId: number;
   name: string;
   start_date: Date;
   location: string;

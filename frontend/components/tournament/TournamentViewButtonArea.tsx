@@ -11,6 +11,7 @@ export default function TournamentViewButtonArea({
   id,
 }: TournamentViewButtonAreaProps) {
   function handleScheduleClick() {
+    console.log("Creating schedule for tournament: ", id);
     createMatchSchedule(id);
   }
   return (
