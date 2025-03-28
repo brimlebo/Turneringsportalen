@@ -12,11 +12,7 @@ import {
 } from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
 import LoginDialog from "@/components/login/LogIn";
-import SignupDialog from "@/components/signUp/SignUp";
 import { createClient } from "@/utils/supabase/server";
-import SignupDialogCardUser from "@/components/signUp/signupCardUser";
-import SignupDialogCardTeamleader from "@/components/signUp/signupCardTeammanager";
-import SignupDialogCardOrganizer from "@/components/signUp/signupCardOrganizer";
 import SignUp from "@/components/signUp/SignUp";
 
 export default async function Page() {
@@ -72,6 +68,11 @@ export default async function Page() {
                   <Link href="/tournaments/create">
                   <Button variant="outline" size="3">
                     Create a tournament
+                  </Button>
+                  </Link>
+                  <Link href="/profile">
+                  <Button variant="outline" size="3">
+                    Checkout profile
                   </Button>
                   </Link>
                 </Flex>
