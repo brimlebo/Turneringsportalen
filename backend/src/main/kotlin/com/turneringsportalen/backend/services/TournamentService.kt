@@ -84,7 +84,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             val match = Match(null, tournamentId, matchDTO.time ?: Clock.System.now(), matchDTO.gameLocationId)
             val matchParticipants = mutableListOf<Participant>()
             for (participant in matchDTO.participants) {
-                matchParticipants.add(Participant(participant.participant.participantId, tournamentId, participant.participant.name))
+                matchParticipants.add(participant.participant)
             }
             addMatchAndParticipants(match, matchParticipants)
         }
@@ -140,7 +140,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             ?: throw Exception("No tournament")
 
         val participants = findAllTournamentParticipants(id)
-            ?: throw Exception("No participants")
+            ?: emptyList()
 
         val fields = findFieldsByTournamentId(id)
             ?: throw Exception("No fields")

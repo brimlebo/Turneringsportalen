@@ -9,6 +9,8 @@ type NameFieldsDialogProps = {
   setOpen: (open: boolean) => void;
 };
 
+const fieldNamePattern = /^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$/;
+
 export default function NameFieldsDialog({
   namingConvention,
   fieldCount,
@@ -28,6 +30,23 @@ export default function NameFieldsDialog({
   }
 
   function handleSubmit() {
+    // Validate all field names
+    const isValid =
+      namingConvention === "keyword"
+        ? fieldNamePattern.test(inputFieldNames[0] || "") &&
+          (inputFieldNames[0]?.length ?? 0) >= 2 &&
+          (inputFieldNames[0]?.length ?? 0) <= 60
+        : inputFieldNames.every(
+            (name) =>
+              fieldNamePattern.test(name || "") &&
+              (name?.length ?? 0) >= 2 &&
+              (name?.length ?? 0) <= 60
+          );
+
+    if (!isValid) {
+      return;
+    }
+
     if (namingConvention === "keyword") {
       const fieldNames = Array.from({ length: fieldCount }).map((_, index) => {
         return `${inputFieldNames[0]} ${index + 1}`;
@@ -88,7 +107,16 @@ export default function NameFieldsDialog({
                 value={inputFieldNames[0] || ""}
                 onChange={handleChange}
                 placeholder="Enter a keyword for your fields"
-                style={inputStyle}
+                pattern="^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$"
+                required
+                minLength={2}
+                maxLength={60}
+                style={{
+                  ...inputStyle,
+                  borderColor: !fieldNamePattern.test(inputFieldNames[0] || "")
+                    ? "red"
+                    : "var(--border-color)",
+                }}
               />
             </label>
           </Flex>
@@ -102,7 +130,18 @@ export default function NameFieldsDialog({
                   value={inputFieldNames[index] || ""}
                   onChange={handleChange}
                   placeholder={`Enter name for field ${index + 1}`}
-                  style={inputStyle}
+                  pattern="^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$"
+                  required
+                  minLength={2}
+                  maxLength={60}
+                  style={{
+                    ...inputStyle,
+                    borderColor: !fieldNamePattern.test(
+                      inputFieldNames[index] || ""
+                    )
+                      ? "red"
+                      : "var(--border-color)",
+                  }}
                 />
               </label>
             </Flex>

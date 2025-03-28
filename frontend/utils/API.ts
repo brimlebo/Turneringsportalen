@@ -7,6 +7,7 @@ import {
   Match,
   MatchOverviewDTO,
   MatchParticipant,
+  WholeTournamentDTO,
 } from "./types";
 import { createClient } from "./supabase/server";
 
@@ -19,25 +20,24 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function fetchTournaments() {
   try {
     const supabase = await createClient();
-    const token = ((await supabase.auth.getSession()).data.session?.access_token)
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
     const response = await fetch(`${API_URL}/tournaments`, {
       method: "GET",
       cache: "no-store", // TEMP FOR TESTING, (MAYBE REMOVE LATER)
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
     if (!response.ok) {
-
-      throw new Error(`Fetch error: ${response.status}`)
+      throw new Error(`Fetch error: ${response.status}`);
     }
     const data = await response.json();
     return data;
   } catch (error: any) {
-    console.error("An error Occured: ", error)
-  } 
-  
+    console.error("An error Occured: ", error);
+    return Promise.reject(error.message);
+  }
 }
 
 /**
@@ -45,7 +45,9 @@ export async function fetchTournaments() {
  * @param id The id of the tournament to fetch
  * @returns The tournament with the given id
  */
-export async function fetchTournamentById(id: number) {
+export async function fetchTournamentById(
+  id: number
+): Promise<WholeTournamentDTO> {
   const response = await fetch(`${API_URL}/tournaments/${id}`, {
     method: "GET",
     cache: "no-store", // TEMP FOR TESTING
@@ -67,12 +69,11 @@ export async function createTournament(data: CreateTournamentDTO) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-
     },
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
+  if (response.status !== 201) {
     throw new Error("Failed to create tournament");
   }
 }

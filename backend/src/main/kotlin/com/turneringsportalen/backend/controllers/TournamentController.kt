@@ -5,6 +5,7 @@ import com.turneringsportalen.backend.entities.Tournament
 import com.turneringsportalen.backend.entities.TournamentField
 import com.turneringsportalen.backend.services.TournamentFieldService
 import com.turneringsportalen.backend.services.TournamentService
+import com.turneringsportalen.backend.utils.validateTournamentToBeCreated
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,10 +19,7 @@ class TournamentController(private val service: TournamentService, private val f
     fun findAllTournaments() = runBlocking { service.findAllTournaments() }
 
     @GetMapping("/{id}")
-    fun findTournamentById(@PathVariable id: Int) = runBlocking { service.findTournamentById(id) }
-
-    @GetMapping("/{id}/tournament")
-    fun findTournamentWithSchedule(@PathVariable id: Int) = runBlocking {
+    fun findTournamentById(@PathVariable id: Int) = runBlocking {
         try {
             val tournament = service.findTournamentWithSchedule(id)
             ResponseEntity(tournament, HttpStatus.OK)
@@ -32,20 +30,29 @@ class TournamentController(private val service: TournamentService, private val f
 
     @PostMapping
     fun addNewTournament(@RequestBody tournamentDTO: CreateTournamentDTO) = runBlocking {
-        var tournament = Tournament(
-            name = tournamentDTO.name,
-            startDate = tournamentDTO.startDate,
-            location = tournamentDTO.location,
-            matchInterval = tournamentDTO.matchInterval
-        )
-        tournament = service.createTournament(tournament)
-        for (fieldName in tournamentDTO.fieldNames) {
-            val field = TournamentField(
-                tournamentId = tournament.tournamentId!!,
-                fieldName = fieldName
+        try {
+            validateTournamentToBeCreated(tournamentDTO)
+            var tournament = Tournament(
+                name = tournamentDTO.name,
+                startDate = tournamentDTO.startDate,
+                location = tournamentDTO.location,
+                matchInterval = tournamentDTO.matchInterval,
+                minimumMatches = tournamentDTO.minimumMatches
             )
-            fieldService.addTournamentField(field)
+            tournament = service.createTournament(tournament)
+            for (fieldName in tournamentDTO.fieldNames) {
+                val field = TournamentField(
+                    tournamentId = tournament.tournamentId!!,
+                    fieldName = fieldName
+                )
+                fieldService.addTournamentField(field)
+            }
+
+            ResponseEntity(HttpStatus.CREATED)
+        } catch (ex: Exception) {
+            ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }
+
     }
 
     @PutMapping("/{id}")
