@@ -24,9 +24,9 @@ export default async function TournamentsOverview() {
     <Container>
       <Grid gap="6" columns={{ xs: "1", md: "2", lg: "3" }}>
         {tournaments.map((tournament) => (
-          <Box key={tournament.tournament_id}>
+          <Box key={tournament.tournamentId}>
             <Card asChild>
-              <a href={`/tournaments/${tournament.tournament_id}`}>
+              <a href={`/tournaments/${tournament.tournamentId}`}>
                 <Heading as="h2">{tournament.name}</Heading>
                 <Flex gap="1" direction={"column"}>
                   <Text>
