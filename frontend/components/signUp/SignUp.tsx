@@ -67,8 +67,8 @@ export default function SignUp() {
     formData.append("role", inputFields.role);
 
     console.log("Sign up attempt with:", inputFields.email, inputFields.password, inputFields.username, inputFields.role);
-    await signup(formData);
     setSuccessMessage(`Success! An email has been sent to ${inputFields.email}. Please check your inbox to validate your account.`);
+    await signup(formData);
   };
 
   return (
