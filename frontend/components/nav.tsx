@@ -36,7 +36,7 @@ export default function Nav({ user }: { user: User | null }) {
                     <Avatar
                       src={user?.user_metadata.avatar_url}
                       radius="full"
-                      fallback="A"
+                      fallback={user?.user_metadata.username?.[0]?.toUpperCase() ?? '?'}
                     />
                     <Box>
                       <Text as="div" size="2">
