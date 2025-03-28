@@ -3,7 +3,12 @@
  * This file contains the functions to communicate with the server
  */
 
-import { CreateTournamentDTO, Tournament, WholeTournamentDTO } from "./types";
+import {
+  CreateParticipantDTO,
+  CreateTournamentDTO,
+  Tournament,
+  WholeTournamentDTO,
+} from "./types";
 import { createClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -99,4 +104,38 @@ export async function createMatchSchedule(tournament_id: number) {
   }
 
   revalidatePath(`/tournaments/${tournament_id}`);
+}
+
+/**
+ * Function to send a POST request to the server to register a participant (team) for a tournament
+ * @param data The participant registration data
+ */
+export async function registerParticipant(data: CreateParticipantDTO): Promise<void> {
+  try {
+    const response = await fetch(`${API_URL}/participant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.status !== 201) {
+      const errorBody = await response.text();
+      // Try to parse backend error if it's JSON, otherwise use text
+      let backendError = errorBody;
+      try {
+        const parsedError = JSON.parse(errorBody);
+        backendError = parsedError.message || parsedError.error || errorBody;
+      } catch (e) { /* Ignore parsing error, use raw text */ }
+
+      throw new Error(`Failed to register participant: ${response.status} ${response.statusText}. ${backendError}`);
+    }
+
+    console.log('Participant registered successfully (201 Created)');
+
+  } catch (error: any) {
+    console.error('An error occurred registering participant:', error);
+    throw new Error(error.message || 'Failed to register participant');
+  }
 }
