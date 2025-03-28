@@ -3,7 +3,7 @@
 import { signup } from "@/components/login/actions";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Button, Dialog, Flex, Text, TextField, RadioGroup, HoverCard, Link, Avatar, Box, Heading, Callout } from "@radix-ui/themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SignUp() {
   const [inputFields, setInputFields] = useState({
@@ -24,8 +24,13 @@ export default function SignUp() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputFields({ ...inputFields, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" }); // Clear error when user starts typing
-    validateForm();
+    //validateForm();
   };
+
+  useEffect(() => {
+    validateForm();
+  }
+  , [inputFields]);
 
   const validateForm = () => {
     const newErrors = { email: "", password: "", username: "" };
@@ -97,6 +102,7 @@ export default function SignUp() {
                 onChange={handleChange}
                 placeholder="Email"
               />
+              {errors.email && <Text color="red">{errors.email}</Text>}
             </label>
             <label>
               <TextField.Root
