@@ -83,7 +83,9 @@ export default function CreateTournamentForm() {
     );
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    // Check if any error exists (is not undefined)
+    return !Object.values(newErrors).some((error) => error !== undefined);
   }
 
   // Function to handle the form submission

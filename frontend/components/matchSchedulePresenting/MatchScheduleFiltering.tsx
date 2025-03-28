@@ -3,7 +3,7 @@
 import { MatchOverviewDTO } from "@/utils/types";
 import { MatchScheduleTable } from "./MatchScheduleTable";
 import { Flex, Table } from "@radix-ui/themes";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MultiSelect } from "../MultiSelect";
 
 type MatchScheduleFilteringProps = {
@@ -25,6 +25,23 @@ interface FilterStates {
 export function MatchScheduleFiltering({
   matches,
 }: MatchScheduleFilteringProps) {
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef<HTMLTableSectionElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (headerRef.current && tableRef.current) {
+        const headerTop = tableRef.current.offsetTop;
+        const scrollPosition = window.scrollY;
+        setIsSticky(scrollPosition > headerTop);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Select the grouping of matches
   const [groupedMatches, setGroupedMatches] = useState(groupByTime());
 
@@ -299,7 +316,7 @@ export function MatchScheduleFiltering({
   }
 
   return (
-    <div>
+    <div ref={tableRef}>
       <Flex style={{ padding: "1rem", paddingLeft: "0" }} gap={"4"}>
         <MultiSelect
           triggerText="Select fields"
@@ -323,7 +340,20 @@ export function MatchScheduleFiltering({
         />
       </Flex>
       <Table.Root>
-        <Table.Header>
+        <Table.Header
+          ref={headerRef}
+          style={{
+            position: isSticky ? "fixed" : "relative",
+            top: isSticky ? 0 : "auto", // Adjust based on your nav height
+            backgroundColor: "var(--color-background)",
+            zIndex: 10,
+            borderBottom: "1px solid var(--gray-5)",
+            width: isSticky ? tableRef.current?.offsetWidth : "auto",
+            visibility: isSticky ? "visible" : "visible",
+            display: "table-header-group",
+            boxShadow: isSticky ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
+          }}
+        >
           <Table.Row>
             <Table.ColumnHeaderCell
               style={{ cursor: "pointer" }}
@@ -347,6 +377,19 @@ export function MatchScheduleFiltering({
             </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
+
+        {/* Add placeholder when header is sticky to prevent content jump */}
+        {isSticky && (
+          <Table.Header style={{ visibility: "hidden" }}>
+            <Table.Row>
+              <Table.ColumnHeaderCell>Time</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Participant 1</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Participant 2</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Location</Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+        )}
 
         <Table.Body>
           <MatchScheduleTable matches={filteredMatches} />

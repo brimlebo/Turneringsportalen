@@ -1,23 +1,29 @@
-'use client'
+"use client";
 
 import { signOutAction } from '@/components/login/actions';
-import { Box, TabNav, Flex, Card, Text, Avatar, Button, Separator } from '@radix-ui/themes';
+import { Box,
+        TabNav,
+        Flex,
+        Card,
+        Text,
+        Avatar,
+        Button,
+        Separator,
+       } from '@radix-ui/themes';
 import { User } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 
 export default function Nav({ user }: { user: User | null }) {
   const pathname = usePathname();
-  console.log("Pathname: ", pathname);
-  console.log("User: ", user);
   return (
     <React.Fragment>
       <Flex justify="between">
         <TabNav.Root >
-          <TabNav.Link active={pathname === '/'} href="/">
+          <TabNav.Link active={pathname === "/"} href="/">
             Home
           </TabNav.Link>
-          <TabNav.Link active={pathname === '/tournaments'} href="/tournaments">
+          <TabNav.Link active={pathname === "/tournaments"} href="/tournaments">
             Tournaments
           </TabNav.Link>
         </TabNav.Root>
@@ -33,10 +39,10 @@ export default function Nav({ user }: { user: User | null }) {
                       fallback="A"
                     />
                     <Box>
-                      <Text as="div" size="2"> 
+                      <Text as="div" size="2">
                         {user?.email}
                       </Text>
-                      <Text as="div" size="2"> 
+                      <Text as="div" size="2">
                         {user?.user_metadata.userrole}
                       </Text>
                     </Box>
