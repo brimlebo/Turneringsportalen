@@ -24,6 +24,14 @@ export default function TournamentViewButtonArea({
           Edit Tournament
         </Link>
       </Button>
+      <Button>
+        <Link
+          style={{ textDecoration: "none", color: "black" }}
+          href={`/tournaments/${id}/registration`}
+        >
+          Register
+        </Link>
+      </Button>
     </Flex>
   );
 }
