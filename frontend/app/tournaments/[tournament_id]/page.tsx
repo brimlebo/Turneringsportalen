@@ -14,3 +14,4 @@ export default async function TournamentPage(props: { params: Params }) {
     </div>
   );
 }
+ 
