@@ -27,7 +27,7 @@ dependencies {
 	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.3"))
 	implementation("io.github.jan-tennert.supabase:postgrest-kt")
 
-	implementation("io.ktor:ktor-client-cio:3.1.1")
+	implementation("io.ktor:ktor-client-cio:3.1.2")
 
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
