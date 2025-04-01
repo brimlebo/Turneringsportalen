@@ -11,6 +11,7 @@ import {
   validateStartDate,
   validateStartTime,
 } from "@/utils/validation";
+import { useRouter } from "next/navigation";
 
 interface ValidationErrors {
   name?: string;
@@ -39,6 +40,8 @@ export default function CreateTournamentForm() {
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
+
+  const router = useRouter();
 
   // Function to update the state when the input fields change
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -83,11 +86,13 @@ export default function CreateTournamentForm() {
     );
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    // Check if any error exists (is not undefined)
+    return !Object.values(newErrors).some((error) => error !== undefined);
   }
 
   // Function to handle the form submission
-  function handleSubmit(fieldNames: string[]) {
+  async function handleSubmit(fieldNames: string[]) {
     if (!validateForm()) {
       return;
     }
@@ -108,9 +113,12 @@ export default function CreateTournamentForm() {
       minimum_matches: inputFields.minimum_matches,
     };
 
-    createTournament(tournament);
-  }
+    const res = await createTournament(tournament);
 
+    console.log("Tournament created client: ", res);
+
+    router.push(`/tournaments/${res.tournamentId}`);
+  }
   // Common styles for the labels
   const labelStyle = {
     fontWeight: "500",
