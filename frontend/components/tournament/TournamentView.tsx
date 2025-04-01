@@ -8,6 +8,8 @@ import {
   Card,
   Avatar,
   Table,
+  Grid,
+  Button,
 } from "@radix-ui/themes";
 import type {
   Tournament,
@@ -16,154 +18,106 @@ import type {
   TournamentWithParticipantsAndMatches,
   WholeTournamentDTO,
 } from "../../utils/types";
-import { fetchTournamentById } from "@/utils/API";
+import { createMatchSchedule, fetchTournamentById } from "@/utils/API";
+import { MatchScheduleFiltering } from "../matchSchedulePresenting/MatchScheduleFiltering";
+import React from "react";
+import Link from "next/link";
+import TournamentViewButtonArea from "./TournamentViewButtonArea";
 
 type Props = {
   id: number;
 };
 
 export default async function TournamentView({ id }: Props) {
-  let tournament: WholeTournamentDTO = await fetchTournamentById(id);
-  const { name, start_date, location, match_interval } = tournament.tournament;
-
-  /// TEMPORARY DATA (ENDPOINTS NOT IMPLEMENTED YET)
-  let participants: Participant[] = [
-    {
-      participant_id: 1,
-      name: "Brann FK",
-      tournament_id: 0,
-    },
-    {
-      participant_id: 2,
-      name: "Laksevåg FK",
-      tournament_id: 0,
-    },
-    {
-      participant_id: 3,
-      name: "Åsane FK",
-      tournament_id: 0,
-    },
-    {
-      participant_id: 4,
-      name: "Fyllingsdalen FK",
-      tournament_id: 0,
-    },
-  ];
-
-  let matches: Match[] = [
-    {
-      match_id: 1,
-      time: new Date(),
-      game_location_id: 0,
-      tournament_id: 0,
-    },
-    {
-      match_id: 2,
-      time: new Date(),
-      game_location_id: 1,
-      tournament_id: 0,
-    },
-    {
-      match_id: 3,
-      time: new Date(),
-      game_location_id: 2,
-      tournament_id: 0,
-    },
-  ];
-  /// END TEMPORARY DATA
-
-  console.log(tournament);
+  console.log("TournamentView: ", id);
+  const wholeTournament: WholeTournamentDTO = await fetchTournamentById(id);
+  const { tournament, participants, schedule, field_names } = wholeTournament;
 
   return (
-    <Container>
-      <Flex>
-        <Heading as="h1">{name}</Heading>
-      </Flex>
-      <Flex direction="row" align="center" gap="9">
-        <Flex direction={"column"} gap="3">
-          <Text>
-            <Strong>Start Date: </Strong>{" "}
-            {new Date(start_date).toLocaleDateString()}
-          </Text>
-          <Text>
-            <Strong>Start Time: </Strong>{" "}
-            {new Date(start_date).toLocaleTimeString()}
-          </Text>
-          <Text>
-            <Strong>Location: </Strong> {location}
-          </Text>
-          <Text>
-            <Strong>Time Between Matches: </Strong>
-            {match_interval} min
-          </Text>
+    <Container size="4">
+      <Flex
+        align="center"
+        justify="center"
+        direction="column"
+        width="100%"
+        gap="5"
+      >
+        {/* Tournament Name */}
+        <Flex direction="row" justify="between" width="100%">
+          <Heading size={"6"} as="h1">
+            {tournament.name}
+          </Heading>
+          <TournamentViewButtonArea id={id} />
         </Flex>
-        <Flex direction={"column"} gap="3">
-          <Text>
-            <Strong>Participants: </Strong>
-          </Text>
-          <Flex gap="3">
-            {participants.map((participant) => (
-              <Box
-                width={"200px"}
-                height={"200px"}
-                key={participant.participant_id}
-              >
-                <Card>
-                  <Flex gap="1" align="center" direction={"column"}>
-                    <Avatar
-                      size="6"
-                      fallback={participant.name
-                        .split(" ")
-                        .map((name) => name[0])
-                        .join("")}
-                    ></Avatar>
-                    {participant.name}
-                  </Flex>
-                </Card>
-              </Box>
-            ))}
+
+        {/* Tournament Details */}
+        <Flex direction="column" align="start" gap="2" width="100%">
+          <Heading size={"5"} as="h2">
+            Tournament Details
+          </Heading>
+          <Flex direction={"row"} gap="8" wrap="wrap">
+            <Text>
+              <Strong>Tournament Start: </Strong>{" "}
+              {new Date(tournament.start_date).toLocaleDateString()}
+              {" at "}
+              {new Date(tournament.start_date).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
+            <Text>
+              <Strong>Location: </Strong> {tournament.location}
+            </Text>
+            <Text>
+              <Strong>Time Between Matches: </Strong>
+              {tournament.match_interval} min
+            </Text>
           </Flex>
         </Flex>
+
+        {/* Participants Section */}
+        <Flex direction={"column"} gap="3" width="100%">
+          <Heading size="5">Participants: </Heading>
+          <Grid gap="2" columns={{ xs: "2", md: "4", lg: "6" }} width="100%">
+            {participants && participants.length > 0 ? (
+              participants.map((participant) => (
+                <Box
+                  width={"150px"}
+                  height={"150px"}
+                  key={participant.participant_id}
+                >
+                  <Card>
+                    <Flex gap="1" align="center" direction={"column"}>
+                      <Avatar
+                        size="6"
+                        fallback={participant.name
+                          .split(" ")
+                          .map((name) => name[0])
+                          .join("")}
+                      />
+                      {participant.name}
+                    </Flex>
+                  </Card>
+                </Box>
+              ))
+            ) : (
+              <Box style={{ width: "fit-content", gridColumn: "1 / -1" }}>
+                Currently no participants in this tournament
+              </Box>
+            )}
+          </Grid>
+        </Flex>
+
+        {/* Matches Section */}
+        <Flex direction="column" width="100%">
+          <Heading size="5">Matches</Heading>
+          {!schedule || schedule.length === 0 ? (
+            <Box>Schedule not created yet</Box>
+          ) : (
+            <MatchScheduleFiltering matches={schedule} />
+          )}
+        </Flex>
       </Flex>
-      <Flex>
-        <Text>
-          <Strong>Matches</Strong>
-        </Text>
-      </Flex>
-
-      <Table.Root>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>Time</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Match ID</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Participant 1</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Participant 2</Table.ColumnHeaderCell>
-
-            <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Game Location</Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-          {matches.map((match) => (
-            <Table.Row key={match.match_id}>
-              <Table.Cell>
-                {new Date(match.time).toLocaleTimeString()}
-              </Table.Cell>
-              <Table.Cell>{match.match_id}</Table.Cell>
-              <Table.Cell>{""}</Table.Cell>
-              <Table.Cell>{""}</Table.Cell>
-              <Table.Cell>
-                {new Date(match.time).toLocaleDateString()}
-              </Table.Cell>
-              <Table.Cell>{match.game_location_id}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
     </Container>
   );
 }
-//{participants.map((participant) => participant.name).join(", ")}
-
-//{matches.map((match) => match.match_id).join(", ")}

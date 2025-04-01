@@ -48,7 +48,7 @@ class TournamentController(private val service: TournamentService, private val f
                 fieldService.addTournamentField(field)
             }
 
-            ResponseEntity(HttpStatus.CREATED)
+            ResponseEntity(tournament, HttpStatus.CREATED)
         } catch (ex: Exception) {
             ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }

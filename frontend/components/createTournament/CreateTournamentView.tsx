@@ -19,7 +19,6 @@ export default function CreateTournamentView() {
     >
       <div className={styles.container}>
         <h1>Create a Tournament</h1>
-        <p>Here is the tournament creation form</p>
         <CreateTournamentForm />
       </div>
     </div>

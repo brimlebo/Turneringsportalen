@@ -12,11 +12,8 @@ import {
 } from "@radix-ui/themes";
 import { ArrowDownIcon } from "@radix-ui/react-icons";
 import LoginDialog from "@/components/login/LogIn";
-import SignupDialog from "@/components/signUp/SignUp";
 import { createClient } from "@/utils/supabase/server";
-import SignupDialogCardUser from "@/components/signUp/signupCardUser";
-import SignupDialogCardTeamleader from "@/components/signUp/signupCardTeammanager";
-import SignupDialogCardOrganizer from "@/components/signUp/signupCardOrganizer";
+import SignUp from "@/components/signUp/SignUp";
 
 export default async function Page() {
   const supabase = await createClient();
@@ -73,51 +70,23 @@ export default async function Page() {
                     Create a tournament
                   </Button>
                   </Link>
+                  <Link href="/profile">
+                  <Button variant="outline" size="3">
+                    Checkout profile
+                  </Button>
+                  </Link>
                 </Flex>
               ) : (
                 <Flex direction="column" gap="3">
                   <p>Already a user?</p>
                   <LoginDialog />
-                  <p>Are you an event organizer?</p>
-                  <p>Do you manage a team?</p>
-                  <p>Or just want to track tournaments?</p>
-                  <p>Create your account now.</p>
+                  <p>Are you an event organizer or do you manage a team?</p>
+                  <SignUp />
                 </Flex>
               )}
-            {/* <Flex direction="column" gap="3">
-                <p>A tournament organizer? Create your account now.</p>
-                <SignupDialog />
-
-                <p>Already a user?</p>
-                <LoginDialog />  
-
-                <p>Just want to set up a quick tournament?</p>
-                <Button variant="outline" size="2">
-                  Click here
-                </Button>
-              </Flex> */}
             </Flex>
           </Flex>
-          
-          {!user ? (
-            <Box>
-                <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
-                  Sign up, and create an account as a:
-                </h2>
-              <Grid columns="3" gap="4" rows="1">
-                <SignupDialogCardUser />
-                <SignupDialogCardTeamleader />
-                <SignupDialogCardOrganizer />
-              </Grid>
-            </Box>
-          ) : (
-            <></>
-          )}
-
-
-          {/* Scroll Indicator */}
           <Box style={{ textAlign: "center" }}>
-            {/* Icon component from radix icons */}
             <ArrowDownIcon style={{ width: 60, height: 60 }} />
           </Box>
           <Section style={{ textAlign: "center", padding: "2rem" }}>
