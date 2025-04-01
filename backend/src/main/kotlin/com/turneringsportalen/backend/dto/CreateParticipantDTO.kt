@@ -27,6 +27,6 @@ data class CreateParticipantDTO(
     }
 
     override fun toString(): String {
-        return "ParticipantDTO(tournamentId=$tournamentId, name='$name')"
+        return "CreateParticipantDTO(tournamentId=$tournamentId, name='$name')"
     }
 }
