@@ -26,7 +26,7 @@ export function validateNumbers(
   max: number,
   fieldName: string
 ): string | undefined {
-  if (typeof input !== "number" || !numberInputRegex.test(input.toString())) {
+  if (!numberInputRegex.test(input.toString())) {
     return `${fieldName} can only contain numbers`;
   }
   if (input < min || input > max) {

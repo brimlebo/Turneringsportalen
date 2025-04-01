@@ -6,7 +6,7 @@ type NameFieldsDialogProps = {
   fieldCount: number;
   onSubmit: (fieldNames: string[]) => void;
   triggerText: string;
-  setOpen: (open: boolean) => void;
+  setOpenPrev: (open: boolean) => void;
 };
 
 const fieldNamePattern = /^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$/;
@@ -16,9 +16,10 @@ export default function NameFieldsDialog({
   fieldCount,
   onSubmit,
   triggerText,
-  setOpen,
+  setOpenPrev,
 }: NameFieldsDialogProps) {
   const [inputFieldNames, setInputFieldNames] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
 
   // Function to update the state when the input fields change
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -55,6 +56,7 @@ export default function NameFieldsDialog({
     } else {
       onSubmit(inputFieldNames);
     }
+    setOpenPrev(false);
     setOpen(false);
   }
 
@@ -68,7 +70,7 @@ export default function NameFieldsDialog({
   };
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Button
           style={{
@@ -148,41 +150,40 @@ export default function NameFieldsDialog({
           ))
         )}
         <Flex style={{ gap: 16 }} mt="4" justify="start">
-          <Dialog.Close>
-            <Button
-              style={{
-                width: "fit-content",
-                backgroundColor: "var(--submit-button-color)",
-                color: "var(--text-color)",
-                border: "1px solid var(--border-color)",
-                padding: "20px",
-                borderRadius: "16px",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
-              onClick={() => setOpen(false)}
-              variant="soft"
-            >
-              Cancel
-            </Button>
-          </Dialog.Close>
-          <Dialog.Close>
-            <Button
-              style={{
-                width: "fit-content",
-                backgroundColor: "var(--submit-button-color)",
-                color: "var(--text-color)",
-                border: "1px solid var(--border-color)",
-                padding: "20px",
-                borderRadius: "16px",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
-              onClick={() => handleSubmit()}
-            >
-              Save
-            </Button>
-          </Dialog.Close>
+          <Button
+            style={{
+              width: "fit-content",
+              backgroundColor: "var(--submit-button-color)",
+              color: "var(--text-color)",
+              border: "1px solid var(--border-color)",
+              padding: "20px",
+              borderRadius: "16px",
+              fontSize: "16px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setOpenPrev(false);
+              setOpen(false);
+            }}
+            variant="soft"
+          >
+            Cancel
+          </Button>
+          <Button
+            style={{
+              width: "fit-content",
+              backgroundColor: "var(--submit-button-color)",
+              color: "var(--text-color)",
+              border: "1px solid var(--border-color)",
+              padding: "20px",
+              borderRadius: "16px",
+              fontSize: "16px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleSubmit()}
+          >
+            Save
+          </Button>
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
