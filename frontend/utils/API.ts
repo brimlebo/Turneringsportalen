@@ -91,22 +91,41 @@ export async function test(): Promise<MatchOverviewDTO[]> {
   return data;
 }
 
-export async function editTournament(data: WholeTournamentDTO) {
-  
-  const response = await fetch(`${API_URL}/tournaments/${data.tournament.tournament_id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+export async function editTournament(data: {
+  tournament_id: number,
+  name: string,
+  start_date: string, 
+  location: string, 
+  match_interval: number
+}){
+const response = await fetch(`${API_URL}/tournaments/${data.tournament_id}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(data),
+});
 
-  if (!response.ok) {
+  if (!response.ok){
     const errorText = await response.text();
     console.error("Failed to edit tournament:", errorText);
-    throw new Error(`Failed to edit tournament: ${response.status}`);
+    throw new Error(errorText);
   }
-
-  return await response.json(); // Or just `return true;` if you don't care about the response body
+  if (response.status === 204) {
+    return null; // No Content
+  }
 }
+
+
+
+export async function updateMatch(data: Match) {
+
+    const response = await fetch(`${API_URL}/match/${data.match_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+  }
+  
 

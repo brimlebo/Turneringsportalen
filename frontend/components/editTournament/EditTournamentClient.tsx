@@ -2,6 +2,8 @@
 
 import { Table } from "@radix-ui/themes";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 import {
   Container,
@@ -12,8 +14,9 @@ import {
   Button,
   Separator,
 } from "@radix-ui/themes";
-import { type MatchOverviewDTO, type WholeTournamentDTO } from "@/utils/types";
-import { editTournament } from "@/utils/API";
+import { type MatchOverviewDTO, type WholeTournamentDTO, type Match } from "@/utils/types";
+import { editTournament} from "@/utils/API";
+
 
 type Props = {
   id: number;
@@ -22,9 +25,19 @@ type Props = {
 
 export default function EditTournamentClient({ id, wholeTournamentData}: Props) { 
   const [schedule, setSchedule] = useState<MatchOverviewDTO[]>(wholeTournamentData.schedule ?? []);
+  const [tournamentLocation, setLocation] = useState<string>(wholeTournamentData.tournament.location);
   const [tournamentName, setTournamentName] = useState<string>(wholeTournamentData.tournament.name);
-  const [tournamentDate, setTournamentDate] = useState<Date>(wholeTournamentData.tournament.start_date);
-  const [groupBy, setGroupBy] = useState<"none" | "team" | "field" | "time">("none");
+  //const [matchTime, setMatchTime] = useState<string>(new Date(matchData.time)).toISOString().split("T")[0];
+  const [matchInterval, setMatchInterval] = useState<number>(wholeTournamentData.tournament.match_interval)
+  const [tournamentDate, setTournamentDate] = useState<string>(
+    new Date(wholeTournamentData.tournament.start_date).toISOString().split("T")[0]
+  );
+
+  const router = useRouter();
+
+  const [groupBy, setGroupBy] = useState<"time" | "team" | "field">("time");
+   
+  
 
   function getParticipantName(id: number): string {
     const participant = wholeTournamentData.participants.find(p => p.participant_id === id);
@@ -35,14 +48,15 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
     switch (groupBy) {
       case "field":
         return groupByField(schedule);
-      case "time":
-        return groupByTime(schedule);
       case "team":
         return groupByTeam(schedule);
+      case "time":
+        return groupByTime(schedule);
       default:
-        return { All: schedule };
+        return groupByTime(schedule);
     }
   }
+
 
   function groupByTeam(matches: MatchOverviewDTO[]) {
     const groups: Record<string, MatchOverviewDTO[]> = {};
@@ -54,6 +68,13 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
     }
     return groups;
   }
+
+  function groupByTime(matches: MatchOverviewDTO[]){
+      //return [...matches].sort((a, b) => a.time.localeCompare(b.time));
+        return {
+          "All matches (by time)": [...matches].sort((a, b) => a.time.localeCompare(b.time))
+        };
+      }
   
   function groupByField(matches: MatchOverviewDTO[]) {
     return matches.reduce((acc, match) => {
@@ -64,35 +85,37 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
     }, {} as Record<string, MatchOverviewDTO[]>);
   }
   
-  function groupByTime(matches: MatchOverviewDTO[]) {
-    return matches.reduce((acc, match) => {
-      const key = new Date(match.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      acc[key] = acc[key] || [];
-      acc[key].push(match);
-      return acc;
-    }, {} as Record<string, MatchOverviewDTO[]>);
-  }
-  
-
   async function handleSave() {
     try {
+
       await editTournament({
-        tournament: {
-          ...wholeTournamentData.tournament,
-          // inline edits like name/location can go here if needed
-        },
-        participants: wholeTournamentData.participants,
-        schedule,
-        field_names: wholeTournamentData.field_names,
+        tournament_id: wholeTournamentData.tournament.tournament_id,
+        name: tournamentName,
+        start_date: new Date(tournamentDate).toISOString(),
+        location: tournamentLocation,
+        match_interval: matchInterval,
       });
-      alert("Tournament updated!");
+  
+      // await Promise.all(schedule.map((match) =>
+      //   updateMatch({
+      //     match_id: match.match_id!,
+      //     tournament_id: wholeTournamentData.tournament.tournament_id,
+      //     time: new Date(`${tournamentDate}T${match.time}`).toISOString(), 
+      //     game_location_id: match.game_location.game_location_id,
+      //   })
+      // ));
+      
+      
+      //alert("Tournament updated!");
+      router.push(`/tournaments/${wholeTournamentData.tournament.tournament_id}`);
     } catch (err) {
       console.error(err);
-      alert("Failed to save tournament");
+      alert("Failed to save tournament in Client");
     }
   }
   
-
+ 
+  
   return (
     <Container>
       <Flex direction="column" gap="1" mb="4">
@@ -112,23 +135,59 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
         />
       </Flex>
 
-      {/* <Flex direction="column" gap="2" mb="4">
-          <TextField.Root
-            value={tournamentDate}
-            onChange={(e) => setTournamentDate(e.target.valueAsDate)}
-
-          />
-
+      <Flex direction="column" gap="2" mb="4">
+        
+      <Flex direction="column" gap="2" mb="4" align="center">
+  <label
+    htmlFor="tournament_date"
+    style={{
+      fontWeight: "500",
+      color: "var(--text-color)",
+    }}
+  >
+    
+  </label>
+  <input
+    id="tournament_date"
+    name="tournament_date"
+    type="date"
+    value={tournamentDate}
+    onChange={(e) => setTournamentDate(e.target.value)}
+    min={new Date().toISOString().split("T")[0]}
+    max={
+      new Date(new Date().setFullYear(new Date().getFullYear() + 2))
+        .toISOString()
+        .split("T")[0]
+    }
+    style={{
+      color: "var(--text-color)",
+      padding: "14px",
+      borderRadius: "8px",
+      backgroundColor: "var(--input-color)",
+      border: "1px solid var(--border-color)",
+    }}
+  />
+</Flex>
 
       </Flex>
-   */}
+  
       <Flex align="center" gap="2" my="3">
-        <Text>Group by:</Text>
-        <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as any)}>
+      <Text></Text>
+        <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as any)}
+             style={{
+              padding: "0.4rem 0.6rem",
+              borderRadius: "6px",
+              border: "1px solid #ccc",
+              backgroundColor: "white",
+              fontSize: "0.95rem",
+              minWidth: "140px",
+            }}>
           <option value="team">Team</option>
           <option value="field">Field</option>
           <option value="time">Time</option>
+         
         </select>
+        
       </Flex>
   
       <Table.Root>
@@ -154,6 +213,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                 <Table.Row key={match.match_id}>
                   <Table.Cell>
                     {match.time}
+                   
                   </Table.Cell>
   
                   <Table.Cell>
@@ -167,6 +227,17 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                         };
                         setSchedule(updated);
                       }}
+                      style={{
+                        padding: "0.4rem 0.6rem",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        backgroundColor: "white",
+                        fontSize: "0.95rem",
+                        minWidth: "140px",
+
+                      }
+
+                      }
                     >
                       <option value="">Select Team</option>
                       {wholeTournamentData.participants.map((p) => (
@@ -190,8 +261,20 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                           participant_id: Number(e.target.value),
                           name: getParticipantName(Number(e.target.value)),
                         };
+                        
                         setSchedule(updated);
                       }}
+                      style={{
+                        padding: "0.4rem 0.6rem",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        backgroundColor: "white",
+                        fontSize: "0.95rem",
+                        minWidth: "140px",
+
+                      }
+
+                      }
                     >
                       <option value="">Select Team</option>
                       {wholeTournamentData.participants.map((p) => (
@@ -206,7 +289,38 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                     </select>
                   </Table.Cell>
   
-                  <Table.Cell>{match.game_location.name}</Table.Cell>
+                  <Table.Cell>
+                  <select
+                    value={match.game_location.game_location_id}
+                    onChange={(e) => {
+                      const updated = [...schedule];
+                      updated[index].game_location = {
+                        game_location_id: Number(e.target.value),
+                        name:
+                          wholeTournamentData.field_names.find(
+                            (f) => f.field_id === Number(e.target.value)
+                          )?.field_name ?? "Unknown",
+                      };
+                      setSchedule(updated);
+                    }}
+                    style={{
+                      padding: "0.4rem 0.6rem",
+                      borderRadius: "6px",
+                      border: "1px solid #ccc",
+                      backgroundColor: "white",
+                      fontSize: "0.95rem",
+                      minWidth: "140px",
+                    }}
+                  >
+                    {wholeTournamentData.field_names.map((field) => (
+                      <option key={field.field_id} value={field.field_id}>
+                        {field.field_name}
+                      </option>
+                    ))}
+                  </select>
+                </Table.Cell>
+
+
                 </Table.Row>
               ))}
             </React.Fragment>
@@ -217,6 +331,6 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
       <Separator my="4" />
       <Button onClick={handleSave}>Save Tournament</Button>
     </Container>
-  ); // <-- this closes the return
-  } // <-- this closes the function
-  
+  );
+  }
+
