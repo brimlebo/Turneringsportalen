@@ -127,15 +127,3 @@ const response = await fetch(`${API_URL}/tournaments/${data.tournament_id}`, {
 }
 
 
-
-export async function updateMatch(data: Match) {
-
-    const response = await fetch(`${API_URL}/match/${data.match_id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      }
-    });
-  }
-  
-

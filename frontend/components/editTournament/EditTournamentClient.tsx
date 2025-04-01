@@ -89,7 +89,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
     try {
 
       await editTournament({
-        tournament_id: wholeTournamentData.tournament.tournament_id,
+        tournament_id: wholeTournamentData.tournament.tournament_id!,
         name: tournamentName,
         start_date: new Date(tournamentDate).toISOString(),
         location: tournamentLocation,
