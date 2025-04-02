@@ -6,18 +6,30 @@ type SelectFieldNamingConventionProps = {
   // Props definition
   onSubmit: (fieldNames: string[]) => void;
   fieldCount: number;
+  validateForm: () => boolean;
 };
 
 export default function SelectFieldNamingConvention({
   onSubmit,
   fieldCount,
+  validateForm,
 }: SelectFieldNamingConventionProps) {
   const [open, setOpen] = useState(false);
+
+  function checkFormIsValid() {
+    if (!validateForm()) {
+      // Need the timeout for it to close after the trigger opens it
+      setTimeout(() => {
+        setOpen(false);
+      }, 0);
+    }
+  }
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Button
+          onClick={() => checkFormIsValid()}
           style={{
             width: "fit-content",
             backgroundColor: "var(--submit-button-color)",
@@ -47,7 +59,7 @@ export default function SelectFieldNamingConvention({
               fieldCount={fieldCount}
               onSubmit={onSubmit}
               namingConvention="keyword"
-              setOpen={setOpen}
+              setOpenPrev={setOpen}
             />
           </Dialog.Close>
           <Dialog.Close>
@@ -56,7 +68,7 @@ export default function SelectFieldNamingConvention({
               fieldCount={fieldCount}
               onSubmit={onSubmit}
               namingConvention="individual"
-              setOpen={setOpen}
+              setOpenPrev={setOpen}
             />
           </Dialog.Close>
         </Flex>

@@ -4,6 +4,7 @@
 // - Numbers (0-9)
 // - Single spaces (not at start or end, no consecutive spaces)
 export const textInputRegex = /^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$/;
+export const numberInputRegex = /^[0-9]+$/;
 
 export function validateInputString(
   input: string,
@@ -25,6 +26,9 @@ export function validateNumbers(
   max: number,
   fieldName: string
 ): string | undefined {
+  if (!numberInputRegex.test(input.toString())) {
+    return `${fieldName} can only contain numbers`;
+  }
   if (input < min || input > max) {
     return `${fieldName} must be between ${min} and ${max}`;
   }
