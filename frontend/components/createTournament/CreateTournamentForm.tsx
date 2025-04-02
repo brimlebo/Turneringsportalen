@@ -356,6 +356,7 @@ export default function CreateTournamentForm() {
           </div>
         </div>
         <SelectFieldNamingConvention
+          validateForm={validateForm}
           onSubmit={handleSubmit}
           fieldCount={inputFields.playing_fields}
         />
