@@ -60,6 +60,55 @@ export async function fetchTournamentById(
 }
 
 /**
+ * Fetches only the basic Tournament data from the server by its id.
+ * Designed for server-side use where related data (participants, schedule) isn't immediately needed.
+ * @param id The id of the tournament to fetch
+ * @returns The Tournament data or null if not found/error
+ */
+export async function fetchTournamentByIdBasic(
+  id: number
+): Promise<Tournament | null> {
+  try {
+    const response = await fetch(`${API_URL}/tournaments/${id}/basic`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (response.status === 404) {
+      console.log(`Tournament with ID ${id} not found (404).`);
+      return null;
+    }
+
+    if (!response.ok) {
+      console.error(
+        `API Error: Failed to fetch basic tournament info for ${id}. Status: ${response.status}`
+      );
+      return null;
+    }
+
+    const tournamentData: Tournament = await response.json();
+
+    if (
+      tournamentData.tournament_id === undefined ||
+      tournamentData.tournament_id === null
+    ) {
+      console.error(
+        `API Error: Missing tournament_id in fetched basic data for ID ${id}`
+      );
+      return null;
+    }
+
+    return tournamentData;
+  } catch (error) {
+    console.error(`Error fetching basic tournament info by ID ${id}:`, error);
+    return null;
+  }
+}
+
+/**
  * Function to send a POST request to the server to create a tournament
  * @param data The tournament object being created
  *
@@ -106,77 +155,9 @@ export async function createMatchSchedule(tournament_id: number) {
   revalidatePath(`/tournaments/${tournament_id}`);
 }
 
-/**
- * Method that fetches a single tournament from the server by its id
- * @param id The id of the tournament to fetch
- * @returns The tournament data or null if not found/error
- */
-export async function fetchTournamentByIdServer(
-  id: number
-): Promise<Tournament | null> {
-  try {
-    const response = await fetch(`${API_URL}/tournaments/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      // Log server-side error for debugging
-      console.error(
-        `API Error: Failed to fetch tournament ${id}. Status: ${response.status}`
-      );
-      return null;
-    }
-
-    const data: WholeTournamentDTO = await response.json();
-
-    if (!data.tournament) {
-      console.error(
-        `API Error: Tournament data missing in response for ID ${id}`
-      );
-      return null;
-    }
-
-    const tournamentData = {
-      ...data.tournament,
-      start_date: data.tournament.start_date,
-      tournament_id:
-        data.tournament.tournament_id || data.tournament.tournamentId,
-    };
-
-    // Validate that the essential ID is present
-    if (
-      tournamentData.tournament_id === undefined ||
-      tournamentData.tournament_id === null
-    ) {
-      console.error(
-        `API Error: Missing tournament_id in fetched data for ID ${id}`
-      );
-      return null;
-    }
-
-    return tournamentData as Tournament;
-  } catch (error) {
-    console.error(`Error fetching tournament by ID ${id}:`, error);
-    return null; // Return null on fetch errors too
-  }
-}
-
-/**
- * Function to send a POST request to the server to register a participant (team) for a tournament
- * This function should remain mostly the same as it's called from the client form.
- * @param data The participant registration data
- */
 export async function registerParticipant(
   data: CreateParticipantDTO
-): Promise<void> {
+): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch(`${API_URL}/participant`, {
       method: "POST",
@@ -186,27 +167,51 @@ export async function registerParticipant(
       body: JSON.stringify(data),
     });
 
-    if (response.status === 409) {
-      throw new Error("Team name already registered for this tournament.");
+    if (!response.ok) {
+      let backendError = `${response.status} ${response.statusText}`;
+      try {
+        const errorBody = await response.text();
+        if (errorBody) {
+          backendError = errorBody;
+          try {
+            const parsedError = JSON.parse(errorBody);
+            backendError =
+              parsedError.message || parsedError.error || backendError;
+          } catch (parseError) {}
+        }
+      } catch (readError) {
+        console.error("Error reading error response body:", readError);
+      }
+
+      if (response.status === 409) {
+        return {
+          success: false,
+          error: "Team name already registered for this tournament.",
+        };
+      }
+
+      return { success: false, error: `Failed to register: ${backendError}` };
     }
 
     if (response.status !== 201) {
-      const errorBody = await response.text();
-      let backendError = errorBody;
-      try {
-        const parsedError = JSON.parse(errorBody);
-        backendError = parsedError.message || parsedError.error || errorBody;
-      } catch (e) {
-        /* Ignore parsing error */
-      }
-      throw new Error(
-        `Failed to register: ${backendError || response.statusText}`
+      console.warn(
+        `Unexpected success status code: ${response.status}. Proceeding anyway.`
       );
     }
+
     revalidatePath(`/tournaments/${data.tournament_id}/registration`);
     revalidatePath(`/tournaments/${data.tournament_id}`);
+
+    return { success: true };
   } catch (error: unknown) {
-    console.error("An error occurred registering participant:", error);
-    throw error;
+    console.error(
+      "An unexpected error occurred registering participant:",
+      error
+    );
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      success: false,
+      error: `An unexpected error occurred: ${errorMessage}`,
+    };
   }
 }

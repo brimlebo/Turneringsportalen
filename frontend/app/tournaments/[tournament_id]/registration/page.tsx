@@ -1,5 +1,5 @@
 import RegisterForTournamentView from "@/components/registerForTournament/RegisterForTournamentView";
-import { fetchTournamentByIdServer } from "@/utils/API";
+import { fetchTournamentByIdBasic } from "@/utils/API";
 import { notFound } from "next/navigation";
 import { Tournament } from "@/utils/types";
 import { JSX } from "react";
@@ -30,7 +30,7 @@ export default async function TournamentRegistrationPage(
   }
 
   // Fetch the tournament data using the parsed ID
-  const tournament: Tournament | null = await fetchTournamentByIdServer(
+  const tournament: Tournament | null = await fetchTournamentByIdBasic(
     tournamentId
   );
 
