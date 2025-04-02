@@ -1,132 +1,190 @@
 "use client"; // This component will render on the client side, required when using React hooks
 
-import React from "react";
+import React, { useState } from "react";
 import { Button, Flex } from "@radix-ui/themes";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Tournament } from "@/utils/types"; // Import the Tournament type
+import { Tournament, CreateParticipantDTO } from "@/utils/types";
+import { registerParticipant } from "@/utils/API";
+import { useRouter } from "next/navigation";
+import { validateInputString } from "@/utils/validation";
+
+// Define props for the form component
+interface RegisterForTournamentFormProps {
+  tournament: Tournament; // Receive tournament data as a prop
+}
+
+// Define state for validation errors (matching the structure used in CreateTournamentForm)
+interface ValidationErrors {
+  name?: string; // Error message for the team name field
+}
 
 /**
  * A component which contains the form to register for a tournament
+ * @param {RegisterForTournamentFormProps} props - Component props including tournament data
  * @returns The form to register for a tournament
  */
-export default function RegisterForTournamentForm() {
-  // Get the tournament_id from the URL
-  const params = useParams();
-  const tournamentId = params.tournament_id;
+export default function RegisterForTournamentForm({
+  tournament,
+}: RegisterForTournamentFormProps) {
+  // Get tournament ID directly from the prop
+  const tournamentId = tournament.tournament_id;
 
-  // State to store the tournament details (to display in the form)
-  const [tournamentDetails, setTournamentDetails] = useState<Tournament | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-
-  // State to store the input fields as a single object to limit the amount of state variables
+  // State for input fields
   const [inputFields, setInputFields] = useState({
     team_name: "",
-    captain_name: "",
-    email: "",
-    phone: "",
-    number_of_players: 1,
-    additional_notes: "",
   });
 
-  // Function to fetch tournament details
-  useEffect(() => {
-    const fetchTournamentDetails = async () => {
-      try {
-        // TODO: Replace this with actual API call
-        // Use frontend/utils/API.ts
+  // State for validation errors displayed next to fields
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
-        // Mocking the tournament data for now
-        const mockData: Tournament = {
-          tournamentId: Number(tournamentId),
-          name: "ABC-turnering",
-          start_date: new Date("2025-03-01"),
-          location: "Brann stadion",
-          fields: [],
-          match_interval: 30,
-        };
+  // State for submission status and general submission errors/success messages
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-        setTournamentDetails(mockData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching tournament details:", error);
-        setLoading(false);
-      }
-    };
+  const router = useRouter();
 
-    if (tournamentId) {
-      fetchTournamentDetails();
-    }
-  }, [tournamentId]);
-
-  // Function to update the state when the input fields change
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  // Update input field state on change
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setInputFields({ ...inputFields, [e.target.name]: e.target.value });
+    if (errors[e.target.name as keyof ValidationErrors]) {
+      setErrors({ ...errors, [e.target.name]: undefined });
+    }
   }
 
-  // Function to handle the form submission
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); // Prevent the default form submission, which would cause a page reload
+  function validateForm(): boolean {
+    const newErrors: ValidationErrors = {};
 
-    // Create the registration data object
-    const registrationData = {
-      tournament_id: tournamentId,
-      ...inputFields,
+    // Validate Team Name
+    newErrors.name = validateInputString(
+      inputFields.team_name.trim(), // Use trimmed value for validation
+      3, // Min length
+      60, // Max length
+      "Team Name" // Field name for error message
+    );
+
+    setErrors(newErrors); // Update the errors state
+
+    // Return true if there are no errors (all values in newErrors are undefined)
+    return !Object.values(newErrors).some((error) => error !== undefined);
+  }
+
+  // Handle form submission
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubmitError(null); // Clear previous submission errors
+    setSuccessMessage(null);
+
+    if (!validateForm()) {
+      return; // Stop submission if validation fails
+    }
+
+    if (tournamentId === undefined || tournamentId === null) {
+      console.error("Form Error: Tournament ID is missing.");
+      setSubmitError("Cannot register: Tournament information is incomplete.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const registrationData: CreateParticipantDTO = {
+      tournament_id: tournamentId, // Use ID from props
+      name: inputFields.team_name.trim(),
     };
 
-    console.log("Registration data:", registrationData);
-
-    // TODO: Make an API call to register the team
-    // Use frontend/utils/API.ts
+    try {
+      await registerParticipant(registrationData);
+      setSuccessMessage(
+        `Successfully registered team "${registrationData.name}"! Redirecting to tournament page...`
+      );
+      setInputFields({ team_name: "" }); // Clear form after successful submission
+      setErrors({}); // Clear errors on success
+      router.push(`/tournaments/${tournamentId}`);
+    } catch (error: any) {
+      console.error("Registration failed:", error);
+      // Use the error message thrown by the API function
+      setSubmitError(
+        error.message || "An unexpected error occurred during registration."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  // Common styles for the labels
-  const labelStyle = {
-    fontWeight: "500",
-    color: "var(--text-color)",
-  };
-
-  // Common styles for the input fields
+  // Common styles
+  const labelStyle = { fontWeight: "500", color: "var(--text-color)" };
   const inputStyle = {
     color: "var(--text-color)",
     padding: "14px",
     borderRadius: "8px",
     backgroundColor: "var(--input-color)",
     border: "1px solid var(--border-color)",
+    width: "100%",
+    boxSizing: "border-box" as "border-box", // Include padding/border in width
+  };
+  // Error message style
+  const errorStyle = {
+    color: "red",
+    fontSize: "0.8rem",
+    marginTop: "2px",
   };
 
-  if (loading) {
-    return <div>Loading tournament details...</div>;
+  // Convert start_date string from props to Date object *for display only*
+  let displayDate: Date | null = null;
+  if (tournament.start_date) {
+    try {
+      displayDate = new Date(tournament.start_date);
+      if (isNaN(displayDate.getTime())) {
+        displayDate = null;
+        console.warn(
+          "Invalid start_date string received:",
+          tournament.start_date
+        );
+      }
+    } catch (e) {
+      console.error("Error parsing start_date:", e);
+      displayDate = null;
+    }
   }
 
+  // Main Form Render
   return (
     <form
       onSubmit={handleSubmit}
       style={{
-        width: "100%",
-        maxWidth: "400px",
+        width: "400px",
+        maxWidth: "100%",
         padding: "24px",
         border: "1px solid var(--border-color)",
         borderRadius: "28px",
         backgroundColor: "var(--form-background)",
         color: "var(--text-color)",
       }}
+      noValidate // Prevent default browser validation, rely on our custom validation
     >
-      {tournamentDetails && (
-        <div style={{ marginBottom: "20px" }}>
-          <h2 style={{ marginBottom: "8px" }}>{tournamentDetails.name}</h2>
-          <p style={{ marginBottom: "4px" }}>
-            Date: {tournamentDetails.start_date.toISOString().split("T")[0]}
-          </p>
-          <p>Location: {tournamentDetails.location}</p>
-        </div>
-      )}
+      {/* Display Tournament Details */}
+      <div style={{ marginBottom: "20px" }}>
+        <h2 style={{ marginBottom: "8px" }}>{tournament.name}</h2>
+        {displayDate ? (
+          <>
+            <p style={{ marginBottom: "4px" }}>
+              Date: {displayDate.toLocaleDateString()}
+            </p>
+            <p style={{ marginBottom: "4px" }}>
+              Time:{" "}
+              {displayDate.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </>
+        ) : (
+          <p style={{ marginBottom: "4px" }}>Date/Time: N/A</p>
+        )}
+        <p>Location: {tournament.location}</p>
+      </div>
 
       <Flex direction="column" gap="4">
+        {/* Input Fields */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <label style={labelStyle} htmlFor="team_name">
@@ -138,92 +196,37 @@ export default function RegisterForTournamentForm() {
               value={inputFields.team_name}
               onChange={handleChange}
               placeholder="Enter your team name"
-              style={inputStyle}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={labelStyle} htmlFor="captain_name">
-              Captain Name
-            </label>
-            <input
-              id="captain_name"
-              name="captain_name"
-              value={inputFields.captain_name}
-              onChange={handleChange}
-              placeholder="Enter team captain's name"
-              style={inputStyle}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={labelStyle} htmlFor="email">
-              Contact Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={inputFields.email}
-              onChange={handleChange}
-              placeholder="Enter contact email"
-              style={inputStyle}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={labelStyle} htmlFor="phone">
-              Contact Phone
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              value={inputFields.phone}
-              onChange={handleChange}
-              placeholder="Enter contact phone number"
-              style={inputStyle}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={labelStyle} htmlFor="number_of_players">
-              Number of Players
-            </label>
-            <input
-              id="number_of_players"
-              name="number_of_players"
-              type="number"
-              min="1"
-              value={inputFields.number_of_players}
-              onChange={handleChange}
-              style={inputStyle}
-              required
-            />
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <label style={labelStyle} htmlFor="additional_notes">
-              Additional Notes
-            </label>
-            <textarea
-              id="additional_notes"
-              name="additional_notes"
-              value={inputFields.additional_notes}
-              onChange={handleChange}
-              placeholder="Any additional information you'd like to share"
+              // Apply conditional styling for error
               style={{
                 ...inputStyle,
-                minHeight: "100px",
-                resize: "vertical",
+                borderColor: errors.name ? "red" : "var(--border-color)",
               }}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.name} // Accessibility: indicate invalid input
+              aria-describedby={errors.name ? "team-name-error" : undefined} // Link input to error message
             />
+            {/* Display Validation Error Message */}
+            {errors.name && (
+              <span id="team-name-error" style={errorStyle} role="alert">
+                {errors.name}
+              </span>
+            )}
           </div>
         </div>
 
+        {/* General Submission Feedback */}
+        {submitError && (
+          <p style={{ color: "red", marginTop: "10px" }} role="alert">
+            Error: {submitError}
+          </p>
+        )}
+        {successMessage && (
+          <p style={{ color: "green", marginTop: "10px" }} role="status">
+            {successMessage}
+          </p>
+        )}
+
+        {/* Submit Button */}
         <Button
           style={{
             width: "fit-content",
@@ -233,10 +236,16 @@ export default function RegisterForTournamentForm() {
             padding: "16px",
             borderRadius: "16px",
             fontSize: "16px",
+            cursor:
+              isSubmitting || !inputFields.team_name.trim()
+                ? "not-allowed"
+                : "pointer", // Keep basic check for immediate disabled state
+            opacity: isSubmitting || !inputFields.team_name.trim() ? 0.6 : 1, // Visual cue for disabled
           }}
           type="submit"
+          disabled={isSubmitting || !inputFields.team_name.trim()} // Disable during submission or if empty
         >
-          Register for Tournament
+          {isSubmitting ? "Registering..." : "Register for Tournament"}
         </Button>
       </Flex>
     </form>
