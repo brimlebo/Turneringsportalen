@@ -3,7 +3,12 @@
  * This file contains the functions to communicate with the server
  */
 
-import { CreateTournamentDTO, Tournament, WholeTournamentDTO } from "./types";
+import {
+  CreateParticipantDTO,
+  CreateTournamentDTO,
+  Tournament,
+  WholeTournamentDTO,
+} from "./types";
 import { createClient } from "./supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -52,6 +57,55 @@ export async function fetchTournamentById(
   });
   const data = await response.json();
   return data;
+}
+
+/**
+ * Fetches only the basic Tournament data from the server by its id.
+ * Designed for server-side use where related data (participants, schedule) isn't immediately needed.
+ * @param id The id of the tournament to fetch
+ * @returns The Tournament data or null if not found/error
+ */
+export async function fetchTournamentByIdBasic(
+  id: number
+): Promise<Tournament | null> {
+  try {
+    const response = await fetch(`${API_URL}/tournaments/${id}/basic`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (response.status === 404) {
+      console.log(`Tournament with ID ${id} not found (404).`);
+      return null;
+    }
+
+    if (!response.ok) {
+      console.error(
+        `API Error: Failed to fetch basic tournament info for ${id}. Status: ${response.status}`
+      );
+      return null;
+    }
+
+    const tournamentData: Tournament = await response.json();
+
+    if (
+      tournamentData.tournament_id === undefined ||
+      tournamentData.tournament_id === null
+    ) {
+      console.error(
+        `API Error: Missing tournament_id in fetched basic data for ID ${id}`
+      );
+      return null;
+    }
+
+    return tournamentData;
+  } catch (error) {
+    console.error(`Error fetching basic tournament info by ID ${id}:`, error);
+    return null;
+  }
 }
 
 /**
@@ -126,4 +180,63 @@ const response = await fetch(`${API_URL}/tournaments/${data.tournament_id}`, {
   }
 }
 
+export async function registerParticipant(
+  data: CreateParticipantDTO
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_URL}/participant`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
+    if (!response.ok) {
+      let backendError = `${response.status} ${response.statusText}`;
+      try {
+        const errorBody = await response.text();
+        if (errorBody) {
+          backendError = errorBody;
+          try {
+            const parsedError = JSON.parse(errorBody);
+            backendError =
+              parsedError.message || parsedError.error || backendError;
+          } catch (parseError) {}
+        }
+      } catch (readError) {
+        console.error("Error reading error response body:", readError);
+      }
+
+      if (response.status === 409) {
+        return {
+          success: false,
+          error: "Team name already registered for this tournament.",
+        };
+      }
+
+      return { success: false, error: `Failed to register: ${backendError}` };
+    }
+
+    if (response.status !== 201) {
+      console.warn(
+        `Unexpected success status code: ${response.status}. Proceeding anyway.`
+      );
+    }
+
+    revalidatePath(`/tournaments/${data.tournament_id}/registration`);
+    revalidatePath(`/tournaments/${data.tournament_id}`);
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error(
+      "An unexpected error occurred registering participant:",
+      error
+    );
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      success: false,
+      error: `An unexpected error occurred: ${errorMessage}`,
+    };
+  }
+}

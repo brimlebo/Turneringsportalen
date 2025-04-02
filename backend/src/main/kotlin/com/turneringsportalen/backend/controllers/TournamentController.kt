@@ -28,6 +28,17 @@ class TournamentController(private val service: TournamentService, private val f
         }
     }
 
+    // Get only basic Tournament data object
+    @GetMapping("/{id}/basic")
+    fun findTournamentByIdBasic(@PathVariable id: Int): ResponseEntity<Tournament> = runBlocking {
+        try {
+            val tournament = service.findTournamentById(id)
+            ResponseEntity(tournament, HttpStatus.OK)
+        } catch (e: Exception) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+    }
+
     @PostMapping
     fun addNewTournament(@RequestBody tournamentDTO: CreateTournamentDTO) = runBlocking {
         try {

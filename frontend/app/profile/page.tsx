@@ -6,7 +6,6 @@ import { CopyIcon } from '@radix-ui/react-icons'
 
 export default async function PrivatePage() {
     const supabase = await createClient()
-
     const { data, error } = await supabase.auth.getUser()
     if (error || !data?.user) {
         redirect('/')
@@ -15,15 +14,25 @@ export default async function PrivatePage() {
 
     return (
         <div className={styles.container}>
-            <p>Hello {user.email}</p>
+            <p style={{ fontSize: '1.8rem' }}>Hello, {user.user_metadata.username}</p>
             <DataList.Root>
-                <DataList.Item align="center">
-                    <DataList.Label minWidth="88px">Status</DataList.Label>
+                <DataList.Item>
+                    <DataList.Label minWidth="88px">Name</DataList.Label>
+                    <DataList.Value>{user.user_metadata.username}</DataList.Value>
+                </DataList.Item>
+                <DataList.Item>
+                    <DataList.Label minWidth="88px">Email</DataList.Label>
                     <DataList.Value>
-                        <Badge color="jade" variant="soft" radius="full">
-                            {user.confirmed_at ? 'Confirmed' : 'Unconfirmed'}
-                        </Badge>
+                        <Link href={`mailto:${user.email}`}>{user.email}</Link>
                     </DataList.Value>
+                </DataList.Item>
+                <DataList.Item>
+                    <DataList.Label minWidth="88px">Role</DataList.Label>
+                    <DataList.Value>{user.user_metadata.userrole}</DataList.Value>
+                </DataList.Item>
+                <DataList.Item>
+                    <DataList.Label minWidth="88px">Created at</DataList.Label>
+                    <DataList.Value>{new Date(user.created_at).toLocaleDateString()}</DataList.Value>
                 </DataList.Item>
                 <DataList.Item>
                     <DataList.Label minWidth="88px">ID</DataList.Label>
@@ -41,29 +50,15 @@ export default async function PrivatePage() {
                         </Flex>
                     </DataList.Value>
                 </DataList.Item>
-                <DataList.Item>
-                    <DataList.Label minWidth="88px">Name</DataList.Label>
-                    <DataList.Value>{user.user_metadata.username}</DataList.Value>
-                </DataList.Item>
-                <DataList.Item>
-                    <DataList.Label minWidth="88px">Email</DataList.Label>
+                <DataList.Item align="center">
+                    <DataList.Label minWidth="88px">Status</DataList.Label>
                     <DataList.Value>
-                        <Link href={`mailto:${user.email}`}>{user.email}</Link>
+                        <Badge color="jade" variant="soft" radius="full">
+                            {user.confirmed_at ? 'Confirmed' : 'Unconfirmed'}
+                        </Badge>
                     </DataList.Value>
-                </DataList.Item>
-                <DataList.Item>
-                    <DataList.Label minWidth="88px">Role</DataList.Label>
-                    <DataList.Value>{user.user_metadata.userrole}</DataList.Value>
-                </DataList.Item>
-                <DataList.Item>
-                    <DataList.Label minWidth="88px">Created at</DataList.Label>
-                    <DataList.Value>{user.created_at}</DataList.Value>
-                </DataList.Item>
-                <DataList.Item>
-                    <DataList.Label minWidth="88px">Updated at</DataList.Label>
-                    <DataList.Value>{user.updated_at}</DataList.Value>
                 </DataList.Item>
             </DataList.Root>
         </div>
-    );
+    )
 }
