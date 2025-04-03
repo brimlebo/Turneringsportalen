@@ -3,9 +3,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
+      interval: "daily"
 
   - package-ecosystem: "gradle"
     directory: "/backend"
     schedule:
-      interval: "weekly"
+      interval: "daily"
