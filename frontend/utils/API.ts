@@ -155,6 +155,31 @@ export async function createMatchSchedule(tournament_id: number) {
   revalidatePath(`/tournaments/${tournament_id}`);
 }
 
+export async function editTournament(data: {
+  tournament_id: number,
+  name: string,
+  start_date: string, 
+  location: string, 
+  match_interval: number
+}){
+const response = await fetch(`${API_URL}/tournaments/${data.tournament_id}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(data),
+});
+
+  if (!response.ok){
+    const errorText = await response.text();
+    console.error("Failed to edit tournament:", errorText);
+    throw new Error(errorText);
+  }
+  if (response.status === 204) {
+    return null; // No Content
+  }
+}
+
 export async function registerParticipant(
   data: CreateParticipantDTO
 ): Promise<{ success: boolean; error?: string }> {
