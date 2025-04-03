@@ -24,7 +24,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.3"))
+	implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
 	implementation("io.github.jan-tennert.supabase:postgrest-kt")
 
 	implementation("io.ktor:ktor-client-cio:3.1.2")
