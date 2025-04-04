@@ -71,13 +71,11 @@ class TournamentController(private val service: TournamentService, private val f
 
 
     // Get data from other tables for a specific tournament
-    @GetMapping("/{matchId}/participants")
-    fun findMatchParticipantsByMatchId(@PathVariable matchId: Int) = runBlocking { service.findMatchParticipantsByMatchId(matchId) }
 
     @GetMapping("/{id}/matches")
     fun findMatchesByTournamentId(@PathVariable id: Int) = runBlocking { service.findMatchesByTournamentId(id) }
 
-    @GetMapping("/{id}/participants")
+    @GetMapping("/{id}/allParticipants")
     fun findParticipantsByTournamentId(@PathVariable id: Int) = runBlocking { service.findAllTournamentParticipants(id) }
 
     @GetMapping("/{id}/fields")

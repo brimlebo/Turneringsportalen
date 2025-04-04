@@ -1,6 +1,7 @@
 package com.turneringsportalen.backend.services
 
 import com.turneringsportalen.backend.entities.MatchParticipant
+import com.turneringsportalen.backend.entities.Participant
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import org.springframework.stereotype.Service
@@ -46,5 +47,23 @@ class MatchParticipantService(private val client: SupabaseClient) {
                 eq("participant_id", participantId)
             }
         }
+    }
+
+    suspend fun findMatchParticipantsByMatchId(id: Int): List<Participant>? {
+        val matchParticipantsIds = client.from("match_participant").select {
+            filter {
+                eq("match_id", id)
+            }
+        }.decodeList<MatchParticipant>().map { it.participantId }
+
+        if (matchParticipantsIds.isEmpty()) {
+            return null
+        }
+
+        return client.from("participant").select {
+            filter {
+                isIn("participant_id", matchParticipantsIds)
+            }
+        }.decodeList<Participant>()
     }
 }
