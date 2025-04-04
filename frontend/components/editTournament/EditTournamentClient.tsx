@@ -178,7 +178,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
               padding: "0.4rem 0.6rem",
               borderRadius: "6px",
               border: "1px solid #ccc",
-              backgroundColor: "white",
+              backgroundColor: "var(--background-color)",
               fontSize: "0.95rem",
               minWidth: "140px",
             }}>
@@ -204,7 +204,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
           {Object.entries(groupMatches(schedule)).map(([groupLabel, matches]) => (
             <React.Fragment key={groupLabel}>
               <Table.Row>
-                <Table.Cell colSpan={4} style={{ background: "#f7f7f7", fontWeight: "bold" }}>
+                <Table.Cell colSpan={4} style={{ background: "var(--background-color)", fontWeight: "bold" }}>
                   {groupLabel}
                 </Table.Cell>
               </Table.Row>
@@ -231,7 +231,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                         padding: "0.4rem 0.6rem",
                         borderRadius: "6px",
                         border: "1px solid #ccc",
-                        backgroundColor: "white",
+                        backgroundColor: "var(--background-color)",
                         fontSize: "0.95rem",
                         minWidth: "140px",
 
@@ -268,7 +268,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                         padding: "0.4rem 0.6rem",
                         borderRadius: "6px",
                         border: "1px solid #ccc",
-                        backgroundColor: "white",
+                        backgroundColor: "var(--background-color)",
                         fontSize: "0.95rem",
                         minWidth: "140px",
 
@@ -307,7 +307,7 @@ export default function EditTournamentClient({ id, wholeTournamentData}: Props) 
                       padding: "0.4rem 0.6rem",
                       borderRadius: "6px",
                       border: "1px solid #ccc",
-                      backgroundColor: "white",
+                      backgroundColor: "var(--background-color)",
                       fontSize: "0.95rem",
                       minWidth: "140px",
                     }}
