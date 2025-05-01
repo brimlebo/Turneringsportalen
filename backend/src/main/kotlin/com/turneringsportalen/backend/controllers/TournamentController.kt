@@ -24,6 +24,7 @@ class TournamentController(private val service: TournamentService, private val f
             val tournament = service.findTournamentWithSchedule(id)
             ResponseEntity(tournament, HttpStatus.OK)
         } catch (e: Exception) {
+            e.printStackTrace()
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
     }
