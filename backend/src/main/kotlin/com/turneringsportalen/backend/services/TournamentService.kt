@@ -1,10 +1,6 @@
 package com.turneringsportalen.backend.services
 
-import com.turneringsportalen.backend.dto.GameLocationDTO
-import com.turneringsportalen.backend.dto.MatchOverviewDTO
-import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
-import com.turneringsportalen.backend.dto.WholeTournamentDTO
-import com.turneringsportalen.backend.dto.SimpleParticipantDTO
+import com.turneringsportalen.backend.dto.*
 import com.turneringsportalen.backend.entities.*
 import com.turneringsportalen.backend.utils.*
 import io.github.jan.supabase.SupabaseClient
@@ -258,32 +254,4 @@ class TournamentService(private val client: SupabaseClient, private val particip
             )
         }
     }
-
-
-// --- helper data classes for intermediate decoding ---
-    @Serializable
-    data class RawMatchRow(
-    @SerialName("match_id") val matchId: Int,
-    val time: Instant,
-    @SerialName("available_fields") val field: FieldRow,
-    @SerialName("match_participant") val matchParticipant: List<ParticipantRow>
-    )
-
-    @Serializable
-    data class FieldRow(
-        @SerialName("field_id") val fieldId: Int,
-        @SerialName("field_name") val fieldName: String
-    )
-
-    @Serializable
-    data class ParticipantRow(
-        @SerialName("participant_id") val participantId: Int?,
-        val participant: ParticipantNameRow
-    )
-
-    @Serializable
-    data class ParticipantNameRow(
-        val name: String
-    )
-
 }
