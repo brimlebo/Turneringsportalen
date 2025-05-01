@@ -137,25 +137,16 @@ class TournamentService(private val client: SupabaseClient, private val particip
 
     // Should only be used if a tournament has passed its registration end date and/or a schedule has been set up for the given tournament
     suspend fun findTournamentWithSchedule(id: Int): WholeTournamentDTO? {
-        System.out.println("findTournamentWithSchedule: $id")
         val tournament = findTournamentById(id)
             ?: throw Exception("No tournament")
-
-        System.out.println("tournament: $tournament")
 
         val participants = findAllTournamentParticipants(id)
             ?: emptyList()
 
-        System.out.println("participants: $participants")
-
         val fields = findFieldsByTournamentId(id)
             ?: throw Exception("No fields")
 
-        System.out.println("fields: $fields")
-
         val schedule = getSchedule(id)
-
-        System.out.println("schedule: $schedule")
 
         val tournamentReturn = WholeTournamentDTO(
             tournament,
@@ -163,8 +154,6 @@ class TournamentService(private val client: SupabaseClient, private val particip
             schedule,
             fields
         )
-
-        System.out.println("return: $tournamentReturn")
 
         return tournamentReturn
     }
@@ -226,7 +215,6 @@ class TournamentService(private val client: SupabaseClient, private val particip
     }
 
     suspend fun getSchedule(tournamentId: Int): List<MatchOverviewDTO> {
-        System.out.println("getSchedule: $tournamentId")
         val rawColumns = """
         match_id,
         time,
@@ -242,8 +230,6 @@ class TournamentService(private val client: SupabaseClient, private val particip
         )
     """.trimIndent()
 
-        System.out.println("rawColumns: $rawColumns")
-
         val rows = client
             .from("match")
             .select(columns = Columns.raw(rawColumns)) {
@@ -252,8 +238,6 @@ class TournamentService(private val client: SupabaseClient, private val particip
                 }
             }
             .decodeList<RawMatchRow>()
-
-        System.out.println("rows: $rows")
 
         return rows.map { row ->
             val localDateTime = Instant.parse(row.time.toString()).toLocalDateTime(TimeZone.currentSystemDefault())
