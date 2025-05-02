@@ -12,7 +12,7 @@ import kotlin.time.Duration.Companion.minutes
 
 // Regex pattern for name and location validation:
 // Matches letters (a-z, A-Z), numbers (0-9), and single spaces (not at start or end, no consecutive spaces)
-val textInputRegex = Regex("^[A-Za-z0-9]+(?:\\s[A-Za-z0-9]+)*$")
+val textInputRegex = Regex("^[A-Za-z0-9æøåÆØÅ]+(?:\\s[A-Za-z0-9æøåÆØÅ]+)*$")
 
 /**
  * Validates that the string matches the allowed characters and is within the specified length.

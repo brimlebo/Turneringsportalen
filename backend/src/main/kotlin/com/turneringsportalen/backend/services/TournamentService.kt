@@ -1,19 +1,16 @@
 package com.turneringsportalen.backend.services
 
-import com.turneringsportalen.backend.dto.GameLocationDTO
-import com.turneringsportalen.backend.dto.MatchOverviewDTO
-import com.turneringsportalen.backend.dto.MatchWithParticipantsDTO
-import com.turneringsportalen.backend.dto.WholeTournamentDTO
-import com.turneringsportalen.backend.dto.SimpleParticipantDTO
+import com.turneringsportalen.backend.dto.*
 import com.turneringsportalen.backend.entities.*
 import com.turneringsportalen.backend.utils.*
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import io.github.jan.supabase.postgrest.query.Columns
+import kotlinx.datetime.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.springframework.stereotype.Service
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.minutes
 
 // Import other services here so their functions can be used in the "main" service?
@@ -80,7 +77,7 @@ class TournamentService(private val client: SupabaseClient, private val particip
             startingTime = startingTime.plus((tournament.matchInterval * 3).minutes)
         }
 
-        for(matchDTO in finalMatches) {
+        for (matchDTO in finalMatches) {
             val match = Match(null, tournamentId, matchDTO.time ?: Clock.System.now(), matchDTO.gameLocationId)
             val matchParticipants = mutableListOf<Participant>()
             for (participant in matchDTO.participants) {
@@ -88,12 +85,12 @@ class TournamentService(private val client: SupabaseClient, private val particip
             }
             addMatchAndParticipants(match, matchParticipants)
         }
-        
+
         return mapMatchesToOverviewList(finalMatches, fields)
     }
 
     suspend fun createTournament(tournament: Tournament): Tournament {
-        return client.from("tournament").insert(tournament){ select() }.decodeSingle<Tournament>()
+        return client.from("tournament").insert(tournament) { select() }.decodeSingle<Tournament>()
     }
 
     suspend fun findAllTournaments(): List<Tournament>? {
@@ -205,48 +202,56 @@ class TournamentService(private val client: SupabaseClient, private val particip
     // Adds "whole" match in one, match and its participants to relevant tables, use case is more for the algorithm after it has generated a schedule
     // Unsure if it needs an api-endpoint, might be better to have an "in bulk" version in the tournamentService for editing after schedule has been created
     suspend fun addMatchAndParticipants(match: Match, participants: List<Participant>) {
-        val savedMatch = client.from("match").insert(match){ select() }.decodeSingle<Match>()
+        val savedMatch = client.from("match").insert(match) { select() }.decodeSingle<Match>()
 
         for ((index, participant) in participants.withIndex()) {
-            client.from("match_participant").insert(MatchParticipant(savedMatch.matchId, participant.participantId ?: 0, index))
+            client.from("match_participant")
+                .insert(MatchParticipant(savedMatch.matchId, participant.participantId ?: 0, index))
         }
     }
 
-    // TEMP GETTING SCHEDULE
     suspend fun getSchedule(tournamentId: Int): List<MatchOverviewDTO> {
-        val matches = findMatchesByTournamentId(tournamentId) ?: return listOf()
-        val fields = findFieldsByTournamentId(tournamentId) ?: return listOf()
+        val rawColumns = """
+        match_id,
+        time,
+        available_fields (
+          field_id,
+          field_name
+        ),
+        match_participant (
+          participant_id,
+          participant (
+            name
+          )
+        )
+    """.trimIndent()
 
-        val schedule = mutableListOf<MatchOverviewDTO>()
-
-        for (match in matches) {
-            val matchParticipants = match.matchId?.let { findMatchParticipantsByMatchId(it) } ?: listOf()
-            val participantsDTO = matchParticipants.mapNotNull { matchParticipant ->
-                val participant = matchParticipant.participantId?.let { participantsService.findParticipantById(it) }
-                participant?.let {
-                    SimpleParticipantDTO(
-                        participantId = matchParticipant.participantId,
-                        name = it.name
-                    )
+        val rows = client
+            .from("match")
+            .select(columns = Columns.raw(rawColumns)) {
+                filter {
+                    eq("tournament_id", tournamentId)
                 }
-            }.toMutableList()
+            }
+            .decodeList<RawMatchRow>()
 
-            // Convert the Instant to a local date/time.
-            val localDateTime = match.time.toLocalDateTime(TimeZone.currentSystemDefault())
+        return rows.map { row ->
+            val localDateTime = Instant.parse(row.time.toString()).toLocalDateTime(TimeZone.currentSystemDefault())
 
-            // Format date as dd.MM (day and month)
-            val day = localDateTime.date.dayOfMonth
-            val month = localDateTime.date.monthNumber
-            val dateString = "%02d.%02d".format(day, month)
-
-            // Format time as hh:mm (hour and minute)
-            val hour = localDateTime.time.hour
-            val minute = localDateTime.time.minute
-            val timeString = "%02d:%02d".format(hour, minute)
-
-            schedule.add(MatchOverviewDTO(match.matchId, dateString, timeString, GameLocationDTO(match.gameLocationId, fields.find { it.fieldId == match.gameLocationId }?.fieldName ?: ""), participantsDTO))
+            MatchOverviewDTO(
+                matchId = row.matchId,
+                date = "%02d.%02d".format(localDateTime.date.dayOfMonth, localDateTime.date.monthNumber),
+                time = "%02d.%02d".format(localDateTime.hour, localDateTime.minute),
+                gameLocation = GameLocationDTO(row.field.fieldId, row.field.fieldName),
+                participants = row.matchParticipant.mapNotNull { mp ->
+                    mp.participantId?.let {
+                        SimpleParticipantDTO(
+                            participantId = it,
+                            name = mp.participant.name
+                        )
+                    }
+                }
+            )
         }
-
-        return schedule
     }
 }

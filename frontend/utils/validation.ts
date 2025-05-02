@@ -3,7 +3,7 @@
 // - Letters (a-z, A-Z)
 // - Numbers (0-9)
 // - Single spaces (not at start or end, no consecutive spaces)
-export const textInputRegex = /^[A-Za-z0-9]+(?:\s[A-Za-z0-9]+)*$/;
+export const textInputRegex = /^[A-Za-z0-9æøåÆØÅ]+(?:\s[A-Za-z0-9æøåÆØÅ]+)*$/;
 export const numberInputRegex = /^[0-9]+$/;
 
 export function validateInputString(
