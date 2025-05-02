@@ -19,11 +19,19 @@ export default async function Page() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser()
-  
+  } = await supabase.auth.getUser();
+
   return (
     <>
-      <Container size="4" style={{ minHeight: "100vh", paddingRight: "calc(var(--scrollbar-width, 15px))", overflow: "hidden" }}>
+      <Container
+        size="4"
+        style={{
+          minHeight: "100vh",
+          paddingRight: "calc(var(--scrollbar-width, 15px))",
+          overflow: "hidden",
+          backgroundColor: "var(--mainBg)",
+        }}
+      >
         <Flex
           direction="column"
           style={{
@@ -53,53 +61,91 @@ export default async function Page() {
             {/* Content Box */}
             <Flex direction="column" gap="4">
               <Box>
-                <h1 style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>
+                <h1
+                  style={{
+                    fontSize: "2.5rem",
+                    marginBottom: "1rem",
+                    color: "var(--highlighter2)",
+                  }}
+                >
                   Turneringsportalen
                 </h1>
-                <p>
+                <p style={{ color: "var(--highlighter1)" }}>
                   <em>from idea to fully fledged tournament in no time</em>
                 </p>
               </Box>
 
-              <Separator size="4" />
+              <Separator size="4" color="tomato" />
               {user ? (
                 <Flex direction="column" gap="3">
-                  <p>Welcome back, {user?.user_metadata.username}</p>
+                  <p style={{ color: "var(--highlighter1)" }}>
+                    Welcome back, {user?.user_metadata.username}
+                  </p>
                   <Link href="/tournaments/create">
-                  <Button variant="outline" size="3">
-                    Create a tournament
-                  </Button>
+                    <Button
+                      size="3"
+                      style={{
+                        border: "1px solid var(--highlighter2)",
+                        color: "var(--highlighter2)",
+                        backgroundColor: "var(--secondaryBg)",
+                      }}
+                    >
+                      Create a tournament
+                    </Button>
                   </Link>
                   <Link href="/profile">
-                  <Button variant="outline" size="3">
-                    Checkout profile
-                  </Button>
+                    <Button
+                      size="3"
+                      style={{
+                        border: "1px solid var(--highlighter2)",
+                        color: "var(--highlighter2)",
+                        backgroundColor: "var(--secondaryBg)",
+                      }}
+                    >
+                      Checkout profile
+                    </Button>
                   </Link>
                 </Flex>
               ) : (
                 <Flex direction="column" gap="3">
-                  <p>Already a user?</p>
+                  <p style={{ color: "var(--highlighter1)" }}>
+                    Already a user?
+                  </p>
                   <LoginDialog />
-                  <p>Are you an event organizer or do you manage a team?</p>
+                  <p style={{ color: "var(--highlighter1)" }}>
+                    Are you an event organizer or do you manage a team?
+                  </p>
                   <SignUp />
                 </Flex>
               )}
             </Flex>
           </Flex>
           <Box style={{ textAlign: "center" }}>
-            <ArrowDownIcon style={{ width: 60, height: 60 }} />
+            <ArrowDownIcon
+              style={{
+                width: 60,
+                height: 60,
+                color: "var(--highlighter2)",
+              }}
+            />
           </Box>
           <Section style={{ textAlign: "center", padding: "2rem" }}>
-            <h2>How it works</h2>
+            <h2 style={{ color: "var(--highlighter2)" }}>How it works</h2>
             <Grid columns="1fr 1fr 1fr" gap="4" style={{ marginTop: "2rem" }}>
               <Box>
-                <h3>1. Create a tournament</h3>
+                <h3 style={{ color: "var(--highlighter1)" }}>
+                  1. Create a tournament
+                </h3>
               </Box>
               <Box>
-                <h3>2. Invite participants</h3>
+                <h3 style={{ color: "var(--highlighter1)" }}>
+                  2. Invite participants
+                </h3>
               </Box>
               <Box>
-                <h3>3. Start the tournament</h3>
+                <h3 style={{ color: "var(--highlighter1)" }}>
+                  3. Start the tournament
+                </h3>
               </Box>
             </Grid>
           </Section>

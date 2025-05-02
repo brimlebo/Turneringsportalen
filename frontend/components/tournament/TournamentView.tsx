@@ -29,7 +29,6 @@ type Props = {
 };
 
 export default async function TournamentView({ id }: Props) {
-  console.log("TournamentView: ", id);
   const wholeTournament: WholeTournamentDTO = await fetchTournamentById(id);
   const { tournament, participants, schedule, field_names } = wholeTournament;
 
@@ -47,7 +46,7 @@ export default async function TournamentView({ id }: Props) {
           <Heading size={"6"} as="h1">
             {tournament.name}
           </Heading>
-          <TournamentViewButtonArea id={id} />
+          <TournamentViewButtonArea scheduleExists={!!schedule} id={id} />
         </Flex>
 
         {/* Tournament Details */}

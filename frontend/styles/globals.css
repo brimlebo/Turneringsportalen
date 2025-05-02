@@ -7,8 +7,15 @@
   --form-background: #f1f1f1;
   --text-color: #333333;
   --border-color: var(--gray-6);
-  --input-color: #ffffff;
+  --input-color: #FFFEF9;
   --submit-button-color: #ffffff;
+
+  --highlighter1: #F36F13;
+  --highlighter2: #DB4151;
+  --highlighter3: #FC9A6A;
+  --mainBg: #FDFCF4;
+  --secondaryBg: #FFFEF9;
+  --tertiaryColor: #b5bfcc;
 }
 
 /* Definition of colors used in dark mode */
@@ -21,6 +28,13 @@
     --border-color: var(--gray-8);
     --input-color: #2a2a2a;
     --submit-button-color: #2a2a2a;
+
+    --highlighter1: #F36F13;
+    --highlighter2: #DB4151;
+    --highlighter3: #FC9A6A;
+    --mainBg: #0a0a0a;
+    --secondaryBg: #2a2a2a;
+    --tertiaryColor: var(--gray-8);
   }
 }
 
