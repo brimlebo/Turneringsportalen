@@ -3,7 +3,7 @@
 import { MatchOverviewDTO } from "@/utils/types";
 import { MatchScheduleTable } from "./MatchScheduleTable";
 import { Flex, Table } from "@radix-ui/themes";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MultiSelect } from "../MultiSelect";
 
 type MatchScheduleFilteringProps = {
@@ -19,37 +19,55 @@ interface FilterStates {
 
 /**
  * Component that filters match data based on selected fields, participants, times, and dates
- * @param object containing the matches defined in the MatchScheduleFilteringProps type
- * @returns a component that contains filters and a table of matches
  */
 export function MatchScheduleFiltering({
   matches,
 }: MatchScheduleFilteringProps) {
-  const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLTableSectionElement>(null);
-  const tableRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [isSticky, setIsSticky] = useState(false);
+  const [headerWidth, setHeaderWidth] = useState("100%");
+  const [leftOffset, setLeftOffset] = useState(0);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const updateSticky = () => {
       if (headerRef.current && tableRef.current) {
-        const headerTop = tableRef.current.offsetTop;
-        const scrollPosition = window.scrollY;
-        setIsSticky(scrollPosition > headerTop);
+        const tableRect = tableRef.current.getBoundingClientRect();
+        // Make header sticky when the table's top is off the viewport
+        const shouldBeSticky = tableRect.top < 0;
+        setIsSticky(shouldBeSticky);
+
+        if (shouldBeSticky) {
+          setHeaderWidth(`${tableRef.current.offsetWidth}px`);
+          setLeftOffset(tableRect.left);
+          const firstBodyRow = tableRef.current.querySelector("tbody tr");
+          if (firstBodyRow) {
+            const cells = (firstBodyRow as HTMLTableRowElement).cells;
+            const widths = Array.from(cells).map(
+              (cell) => cell.getBoundingClientRect().width
+            );
+            setColumnWidths(widths);
+          }
+        }
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", updateSticky);
+    window.addEventListener("resize", updateSticky);
+    return () => {
+      window.removeEventListener("scroll", updateSticky);
+      window.removeEventListener("resize", updateSticky);
+    };
   }, []);
 
-  // Select the grouping of matches
+  // Grouping functions and state for filtered matches remain unchanged...
   const [groupedMatches, setGroupedMatches] = useState(groupByTime());
-
-  // State to keep track of filtered matches
   const [filteredMatches, setFilteredMatches] =
     useState<MatchOverviewDTO[][]>(groupedMatches);
 
-  // Create initial filter items
+  // (Construct fields, participants, times, dates…)
+
   const fields = Array.from(
     new Map(
       matches.map((match) => [
@@ -81,12 +99,12 @@ export function MatchScheduleFiltering({
         ],
       ])
     ).values()
-  ).sort((a, b) => {
-    return a.text.localeCompare(b.text, undefined, {
+  ).sort((a, b) =>
+    a.text.localeCompare(b.text, undefined, {
       numeric: true,
       sensitivity: "base",
-    });
-  });
+    })
+  );
 
   const times = Array.from(new Set(matches.map((match) => match.time)))
     .sort()
@@ -96,7 +114,7 @@ export function MatchScheduleFiltering({
     .sort()
     .map((date) => ({ key: date, text: date }));
 
-  // Object containing the selected filter states
+  // Initial filter states
   const [filterStates, setFilterStates] = useState<FilterStates>({
     fields: fields.map((field) => String(field.key)),
     participants: participants.map((participant) => String(participant.key)),
@@ -104,6 +122,7 @@ export function MatchScheduleFiltering({
     dates: dates.map((date) => String(date.key)),
   });
 
+  // Filter change and MultiSelect handler functions remain unchanged
   const handleFilterChange = (newFilterStates: FilterStates) => {
     if (
       newFilterStates.fields.length === 0 ||
@@ -196,7 +215,6 @@ export function MatchScheduleFiltering({
     setGroupedMatches(newGroupedMatches);
 
     // update filtered matches based on new grouping
-    // done here because if using the old filtered matches, the grouping is one click behind
     const newFilteredMatches = newGroupedMatches
       .map((group) =>
         group.filter(
@@ -220,7 +238,6 @@ export function MatchScheduleFiltering({
   }
 
   function groupByTime(): MatchOverviewDTO[][] {
-    // Group matches by time
     const groupedMatches = matches.reduce(
       (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
         const timeKey = `${match.date} ${match.time}`;
@@ -232,27 +249,21 @@ export function MatchScheduleFiltering({
       },
       {}
     );
-
-    // Convert to array of arrays and sort matches within each group by game_location_id
-    const matchesArray = Object.values(groupedMatches).map((matches) =>
-      matches.sort(
+    const matchesArray = Object.values(groupedMatches).map((group) =>
+      group.sort(
         (a, b) =>
           a.game_location.game_location_id - b.game_location.game_location_id
       )
     );
-
-    // Sort groups by date and time
     matchesArray.sort((a, b) => {
       const timeA = `${a[0].date} ${a[0].time}`;
       const timeB = `${b[0].date} ${b[0].time}`;
       return timeA.localeCompare(timeB);
     });
-
     return matchesArray;
   }
 
   function groupByField(): MatchOverviewDTO[][] {
-    // Group matches by field
     const groupedMatches = matches.reduce(
       (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
         const fieldKey = String(match.game_location.game_location_id);
@@ -264,26 +275,20 @@ export function MatchScheduleFiltering({
       },
       {}
     );
-
-    // Convert to array of arrays and sort matches within each group by time
-    const matchesArray = Object.values(groupedMatches).map((matches) =>
-      matches.sort((a, b) => {
+    const matchesArray = Object.values(groupedMatches).map((group) =>
+      group.sort((a, b) => {
         const timeA = `${a.date} ${a.time}`;
         const timeB = `${b.date} ${b.time}`;
         return timeA.localeCompare(timeB);
       })
     );
-
-    // Sort groups by field name
     matchesArray.sort((a, b) =>
       a[0].game_location.name.localeCompare(b[0].game_location.name)
     );
-
     return matchesArray;
   }
 
   function groupByDate(): MatchOverviewDTO[][] {
-    // Group matches by date
     const groupedMatches = matches.reduce(
       (groups: Record<string, MatchOverviewDTO[]>, match: MatchOverviewDTO) => {
         if (!groups[match.date]) {
@@ -294,29 +299,21 @@ export function MatchScheduleFiltering({
       },
       {}
     );
-
-    // Convert to array of arrays and sort matches within each group
-    const matchesArray = Object.values(groupedMatches).map((matches) =>
-      matches.sort((a, b) => {
-        // First sort by time
+    const matchesArray = Object.values(groupedMatches).map((group) =>
+      group.sort((a, b) => {
         const timeComparison = a.time.localeCompare(b.time);
         if (timeComparison !== 0) return timeComparison;
-
-        // If times are equal, sort by game_location_id
         return (
           a.game_location.game_location_id - b.game_location.game_location_id
         );
       })
     );
-
-    // Sort groups by date
     matchesArray.sort((a, b) => a[0].date.localeCompare(b[0].date));
-
     return matchesArray;
   }
 
   return (
-    <div ref={tableRef}>
+    <div style={{ position: "relative" }}>
       <Flex style={{ padding: "1rem", paddingLeft: "0" }} gap={"4"}>
         <MultiSelect
           triggerText="Select fields"
@@ -339,58 +336,101 @@ export function MatchScheduleFiltering({
           onSelectionChange={handleDateSelectionChange}
         />
       </Flex>
-      <Table.Root>
+      <Table.Root
+        ref={tableRef}
+        style={{
+          width: "100%",
+          borderCollapse: "separate",
+          borderSpacing: 0,
+        }}
+      >
         <Table.Header
           ref={headerRef}
           style={{
-            position: isSticky ? "fixed" : "relative",
-            top: isSticky ? 0 : "auto", // Adjust based on your nav height
-            backgroundColor: "var(--color-background)",
-            zIndex: 10,
-            borderBottom: "1px solid var(--gray-5)",
-            width: isSticky ? tableRef.current?.offsetWidth : "auto",
-            visibility: isSticky ? "visible" : "visible",
-            display: "table-header-group",
-            boxShadow: isSticky ? "0 2px 4px rgba(0,0,0,0.1)" : "none",
+            position: isSticky ? "fixed" : "static",
+            top: isSticky ? 0 : "auto",
+            backgroundColor: "var(--highlighter2)",
+            zIndex: 999,
+            boxShadow: isSticky ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+            width: isSticky ? headerWidth : "100%",
+            left: isSticky ? `${leftOffset}px` : "auto",
           }}
         >
           <Table.Row>
             <Table.ColumnHeaderCell
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: "pointer",
+                color: "var(--secondaryBg)",
+                width:
+                  isSticky && columnWidths[0] ? `${columnWidths[0]}px` : "auto",
+              }}
               onClick={() => updateGrouping("time")}
             >
               Time
             </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Participant 1</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Participant 2</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell
-              style={{ cursor: "pointer" }}
+              style={{
+                color: "var(--secondaryBg)",
+                width:
+                  isSticky && columnWidths[1] ? `${columnWidths[1]}px` : "auto",
+              }}
+            >
+              Participant 1
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell
+              style={{
+                color: "var(--secondaryBg)",
+                width:
+                  isSticky && columnWidths[2] ? `${columnWidths[2]}px` : "auto",
+              }}
+            >
+              Participant 2
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell
+              style={{
+                cursor: "pointer",
+                color: "var(--secondaryBg)",
+                width:
+                  isSticky && columnWidths[3] ? `${columnWidths[3]}px` : "auto",
+              }}
               onClick={() => updateGrouping("date")}
             >
               Date
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: "pointer",
+                color: "var(--secondaryBg)",
+                width:
+                  isSticky && columnWidths[4] ? `${columnWidths[4]}px` : "auto",
+              }}
               onClick={() => updateGrouping("field")}
             >
               Location
             </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
-
-        {/* Add placeholder when header is sticky to prevent content jump */}
         {isSticky && (
           <Table.Header style={{ visibility: "hidden" }}>
             <Table.Row>
-              <Table.ColumnHeaderCell>Time</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Participant 1</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Participant 2</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell>Location</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell style={{ width: columnWidths[0] }}>
+                Time
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell style={{ width: columnWidths[1] }}>
+                Participant 1
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell style={{ width: columnWidths[2] }}>
+                Participant 2
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell style={{ width: columnWidths[3] }}>
+                Date
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell style={{ width: columnWidths[4] }}>
+                Location
+              </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
         )}
-
         <Table.Body>
           <MatchScheduleTable matches={filteredMatches} />
         </Table.Body>

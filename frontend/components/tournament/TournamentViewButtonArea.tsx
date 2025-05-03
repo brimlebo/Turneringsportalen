@@ -26,22 +26,36 @@ export default function TournamentViewButtonArea({
         <Button
           disabled={scheduleClicked}
           onClick={() => handleScheduleClick()}
+          style={{
+            color: "var(--text-color)",
+            backgroundColor: "var(--highlighter3)",
+          }}
         >
           Create Schedule
         </Button>
       )}
-      <Button>
+      <Button
+        style={{
+          color: "var(--text-color)",
+          backgroundColor: "var(--highlighter3)",
+        }}
+      >
         <Link
-          style={{ textDecoration: "none", color: "black" }}
+          style={{ textDecoration: "none" }}
           href={`/tournaments/${id}/edit`}
         >
           Edit Tournament
         </Link>
       </Button>
       {!scheduleExists && (
-        <Button>
+        <Button
+          style={{
+            color: "var(--text-color)",
+            backgroundColor: "var(--highlighter3)",
+          }}
+        >
           <Link
-            style={{ textDecoration: "none", color: "black" }}
+            style={{ textDecoration: "none" }}
             href={`/tournaments/${id}/registration`}
           >
             Register

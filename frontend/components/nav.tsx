@@ -31,13 +31,12 @@ export default function Nav({ user }: { user: User | null }) {
             Home
           </TabNav.Link>
           <TabNav.Link
-            active={pathname === "/tournaments"}
+            active={pathname.includes("/tournaments")}
             href="/tournaments"
             style={{
-              color:
-                pathname === "/tournaments"
-                  ? "var(--highlighter2)"
-                  : "var(--text-color)",
+              color: pathname.includes("/tournaments")
+                ? "var(--highlighter2)"
+                : "var(--text-color)",
             }}
           >
             Tournaments

@@ -10,12 +10,12 @@
   --input-color: #FFFEF9;
   --submit-button-color: #ffffff;
 
-  --highlighter1: #F36F13;
-  --highlighter2: #DB4151;
-  --highlighter3: #FC9A6A;
+  --highlighter1: #933d00;
+  --highlighter2: #c43b49;
+  --highlighter3: #fe874b;
   --mainBg: #FDFCF4;
-  --secondaryBg: #FFFEF9;
-  --tertiaryColor: #b5bfcc;
+  --secondaryBg: #fefefd;
+  --tertiaryColor: #ccc2b5;
 }
 
 /* Definition of colors used in dark mode */
@@ -31,9 +31,9 @@
 
     --highlighter1: #F36F13;
     --highlighter2: #DB4151;
-    --highlighter3: #FC9A6A;
-    --mainBg: #0a0a0a;
-    --secondaryBg: #2a2a2a;
+    --highlighter3: #d9520e;
+    --mainBg: #131313;
+    --secondaryBg: #191919;
     --tertiaryColor: var(--gray-8);
   }
 }

@@ -72,12 +72,18 @@ export function MultiSelect({
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <Button variant="soft">
+        <Button
+          style={{
+            border: "1px solid var(--highlighter2)",
+            color: "var(--highlighter2)",
+            backgroundColor: "var(--secondaryBg)",
+          }}
+        >
           {triggerText}
           <DropdownMenu.TriggerIcon />
         </Button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content>
+      <DropdownMenu.Content color="tomato">
         <DropdownMenu.Item onSelect={handleToggleAll}>
           {Object.values(checkedItems).every((isChecked) => isChecked)
             ? "Uncheck All"

@@ -208,7 +208,14 @@ export default function SignUp() {
                   <Text>
                     <HoverCard.Root>
                       <HoverCard.Trigger>
-                        <Text style={{ cursor: "pointer" }}>Regular user</Text>
+                        <Text
+                          style={{
+                            cursor: "pointer",
+                            color: "var(--highlighter1)",
+                          }}
+                        >
+                          Regular user
+                        </Text>
                       </HoverCard.Trigger>
                       <HoverCard.Content
                         maxWidth="300px"
@@ -232,7 +239,7 @@ export default function SignUp() {
                             <Text
                               as="div"
                               size="2"
-                              style={{ color: "var(--text-color)" }}
+                              style={{ color: "var(--highlighter1)" }}
                             >
                               A regular user can participate in tournaments.
                             </Text>
@@ -246,7 +253,14 @@ export default function SignUp() {
                   <Text>
                     <HoverCard.Root>
                       <HoverCard.Trigger>
-                        <Text style={{ cursor: "pointer" }}>Team manager</Text>
+                        <Text
+                          style={{
+                            cursor: "pointer",
+                            color: "var(--highlighter1)",
+                          }}
+                        >
+                          Team manager
+                        </Text>
                       </HoverCard.Trigger>
                       <HoverCard.Content
                         maxWidth="300px"
@@ -270,7 +284,7 @@ export default function SignUp() {
                             <Text
                               as="div"
                               size="2"
-                              style={{ color: "var(--text-color)" }}
+                              style={{ color: "var(--highlighter1)" }}
                             >
                               This account type will allow you to create and
                               manage teams. You can also register your teams for
@@ -286,7 +300,12 @@ export default function SignUp() {
                   <Text>
                     <HoverCard.Root>
                       <HoverCard.Trigger>
-                        <Text style={{ cursor: "pointer" }}>
+                        <Text
+                          style={{
+                            cursor: "pointer",
+                            color: "var(--highlighter1)",
+                          }}
+                        >
                           Event organizer
                         </Text>
                       </HoverCard.Trigger>
@@ -312,7 +331,7 @@ export default function SignUp() {
                             <Text
                               as="div"
                               size="2"
-                              style={{ color: "var(--text-color)" }}
+                              style={{ color: "var(--highlighter1)" }}
                             >
                               Will allow you to create tournaments, make
                               registration forms, generate match schedules and
@@ -330,7 +349,7 @@ export default function SignUp() {
               as="div"
               size="3"
               mb="1"
-              style={{ color: "var(--text-color)" }}
+              style={{ color: "var(--highlighter1)" }}
             >
               Hover over the roles to see a description.
             </Text>
