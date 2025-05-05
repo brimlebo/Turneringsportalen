@@ -1,14 +1,5 @@
-@media (max-width: 768px) {
-  .heroSection {
-    flex-direction: column !important;
-    text-align: center;
-    gap: 2rem !important;
-  }
-}
-
 .container {
   padding: 16px;
-  min-height: 100vh;
   color: var(--text-color);
   display: flex;
   flex-direction: column;

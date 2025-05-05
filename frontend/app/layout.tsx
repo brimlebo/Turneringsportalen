@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
-import { Theme } from "@radix-ui/themes";
-import { ThemeProvider}  from "next-themes";
+import { Theme, Flex, Box } from "@radix-ui/themes";
+import { ThemeProvider } from "next-themes";
 import React from "react";
 import Footer from "@/components/footer";
 import NavigationMenu from "@/components/navigation-menu";
@@ -19,9 +18,9 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head/>
+      <head />
       <body>
-        <ThemeProvider 
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
@@ -34,9 +33,14 @@ export default async function RootLayout({
             scaling="100%"
             radius="full"
           >
-            <NavigationMenu/>
-            {children}
-            <Footer/>
+            <Flex direction="column" style={{ minHeight: "100vh" }}>
+              <NavigationMenu />
+              {/* Wrap children in a Box that can grow */}
+              <Box style={{ flexGrow: 1, backgroundColor: "var(--mainBg)" }}>
+                {children}
+              </Box>
+              <Footer />
+            </Flex>
           </Theme>
         </ThemeProvider>
       </body>

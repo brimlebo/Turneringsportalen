@@ -26,18 +26,16 @@ export default async function Page() {
       <Container
         size="4"
         style={{
-          minHeight: "100vh",
           paddingRight: "calc(var(--scrollbar-width, 15px))",
-          overflow: "hidden",
-          backgroundColor: "var(--mainBg)",
+          paddingTop: "8rem",
+          paddingBottom: "2rem",
+          paddingLeft: "2rem",
         }}
       >
         <Flex
           direction="column"
           style={{
-            minHeight: "100vh", // This will make the container take up the full height of the screen
             gap: "2rem",
-            padding: "2rem",
           }}
         >
           {/* Hero Section */}
@@ -45,7 +43,6 @@ export default async function Page() {
             align="center"
             justify="center"
             gap="9" // This will add space between the image and the content
-            style={{ flex: 1 }} // This will make the hero section take up the remaining space
           >
             {/* Image Box */}
             <Box>
