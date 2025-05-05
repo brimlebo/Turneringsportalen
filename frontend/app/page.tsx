@@ -85,6 +85,7 @@ export default async function Page() {
                         border: "1px solid var(--highlighter2)",
                         color: "var(--highlighter2)",
                         backgroundColor: "var(--secondaryBg)",
+                        width: "100%"
                       }}
                     >
                       Create a tournament
@@ -97,6 +98,7 @@ export default async function Page() {
                         border: "1px solid var(--highlighter2)",
                         color: "var(--highlighter2)",
                         backgroundColor: "var(--secondaryBg)",
+                        width: "100%"
                       }}
                     >
                       Checkout profile
