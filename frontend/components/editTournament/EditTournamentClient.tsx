@@ -257,6 +257,7 @@ export default function EditTournamentClient({
                   >
                     <Table.Cell>{match.time}</Table.Cell>
 
+                    {/* Participant 1 Cell */}
                     <Table.Cell>
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
@@ -266,6 +267,7 @@ export default function EditTournamentClient({
                               borderRadius: "6px",
                               border: "1px solid #ccc",
                               backgroundColor: "var(--background-color)",
+                              color: "var(--text-color)",
                               fontSize: "0.95rem",
                               minWidth: "140px",
                               textAlign: "left",
@@ -314,6 +316,7 @@ export default function EditTournamentClient({
                               borderRadius: "6px",
                               border: "1px solid #ccc",
                               backgroundColor: "var(--background-color)",
+                              color: "var(--text-color)",
                               fontSize: "0.95rem",
                               minWidth: "140px",
                               textAlign: "left",
@@ -362,6 +365,7 @@ export default function EditTournamentClient({
                               borderRadius: "6px",
                               border: "1px solid #ccc",
                               backgroundColor: "var(--background-color)",
+                              color: "var(--text-color)",
                               fontSize: "0.95rem",
                               minWidth: "140px",
                               textAlign: "left",
