@@ -42,7 +42,7 @@ export default function Nav({ user }: { user: User | null }) {
             Tournaments
           </TabNav.Link>
         </TabNav.Root>
-        {user ? (
+        {user && (
           <Box m="3">
             <Flex direction="row" align="center" gap="5" justify="center">
               <Card asChild variant="ghost">
@@ -54,12 +54,21 @@ export default function Nav({ user }: { user: User | null }) {
                       fallback={
                         user?.user_metadata.username?.[0]?.toUpperCase() ?? "?"
                       }
+                      color="tomato"
                     />
                     <Box>
-                      <Text as="div" size="2">
+                      <Text
+                        as="div"
+                        size="2"
+                        style={{ color: "var(--highlighter2)" }}
+                      >
                         {user?.email}
                       </Text>
-                      <Text as="div" size="2">
+                      <Text
+                        as="div"
+                        size="2"
+                        style={{ color: "var(--highlighter1)" }}
+                      >
                         {user?.user_metadata.userrole}
                       </Text>
                     </Box>
@@ -67,20 +76,18 @@ export default function Nav({ user }: { user: User | null }) {
                 </a>
               </Card>
               <form action={signOutAction}>
-                <Button type="submit" variant="outline">
+                <Button
+                  type="submit"
+                  style={{
+                    border: "1px solid var(--highlighter2)",
+                    color: "var(--highlighter2)",
+                    backgroundColor: "var(--secondaryBg)",
+                  }}
+                >
                   Sign out
                 </Button>
               </form>
             </Flex>
-          </Box>
-        ) : (
-          <Box m="3">
-            <Flex
-              direction="row"
-              align="center"
-              gap="5"
-              justify="center"
-            ></Flex>
           </Box>
         )}
       </Flex>

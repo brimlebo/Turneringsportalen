@@ -111,14 +111,15 @@ export default function RegisterForTournamentForm({
   }
 
   // Common styles
-  const labelStyle = { fontWeight: "500", color: "var(--text-color)" };
+  const labelStyle = { fontWeight: "550", color: "var(--highlighter2)" };
   const inputStyle = {
-    color: "var(--text-color)",
+    color: "var(--highlighter1)",
     padding: "14px",
     borderRadius: "8px",
     backgroundColor: "var(--input-color)",
     border: "1px solid var(--border-color)",
     width: "100%",
+
     boxSizing: "border-box" as "border-box", // Include padding/border in width
   };
   // Error message style
@@ -156,21 +157,28 @@ export default function RegisterForTournamentForm({
         padding: "24px",
         border: "1px solid var(--border-color)",
         borderRadius: "28px",
-        backgroundColor: "var(--form-background)",
+        backgroundColor: "var(--secondaryBg)",
         color: "var(--text-color)",
       }}
       noValidate // Prevent default browser validation, rely on our custom validation
     >
       {/* Display Tournament Details */}
       <div style={{ marginBottom: "20px" }}>
-        <h2 style={{ marginBottom: "8px" }}>{tournament.name}</h2>
+        <h2 style={{ marginBottom: "8px", color: "var(--highlighter2)" }}>
+          {tournament.name}
+        </h2>
         {displayDate ? (
           <>
-            <p style={{ marginBottom: "4px" }}>
-              Date: {displayDate.toLocaleDateString()}
+            <p style={{ marginBottom: "4px", color: "var(--highlighter1)" }}>
+              <span style={{ color: "var(--highlighter2", fontWeight: 550 }}>
+                Date:{" "}
+              </span>{" "}
+              {displayDate.toLocaleDateString()}
             </p>
-            <p style={{ marginBottom: "4px" }}>
-              Time:{" "}
+            <p style={{ marginBottom: "4px", color: "var(--highlighter1)" }}>
+              <span style={{ color: "var(--highlighter2", fontWeight: 550 }}>
+                Time:{" "}
+              </span>
               {displayDate.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -178,9 +186,16 @@ export default function RegisterForTournamentForm({
             </p>
           </>
         ) : (
-          <p style={{ marginBottom: "4px" }}>Date/Time: N/A</p>
+          <p style={{ marginBottom: "4px", color: "var(--highlighter1)" }}>
+            Date/Time: N/A
+          </p>
         )}
-        <p>Location: {tournament.location}</p>
+        <p style={{ color: "var(--highlighter1)" }}>
+          <span style={{ color: "var(--highlighter2)", fontWeight: 550 }}>
+            Location:{" "}
+          </span>
+          {tournament.location}
+        </p>
       </div>
 
       <Flex direction="column" gap="4">
@@ -230,17 +245,16 @@ export default function RegisterForTournamentForm({
         <Button
           style={{
             width: "fit-content",
-            backgroundColor: "var(--submit-button-color)",
+            backgroundColor: "var(--highlighter3)",
             color: "var(--text-color)",
-            border: "1px solid var(--border-color)",
-            padding: "16px",
-            borderRadius: "16px",
+            padding: "20px",
+            borderRadius: "9999px",
             fontSize: "16px",
             cursor:
               isSubmitting || !inputFields.team_name.trim()
                 ? "not-allowed"
                 : "pointer", // Keep basic check for immediate disabled state
-            opacity: isSubmitting || !inputFields.team_name.trim() ? 0.6 : 1, // Visual cue for disabled
+            opacity: isSubmitting || !inputFields.team_name.trim() ? 0.8 : 1, // Visual cue for disabled
           }}
           type="submit"
           disabled={isSubmitting || !inputFields.team_name.trim()} // Disable during submission or if empty

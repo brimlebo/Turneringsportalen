@@ -32,11 +32,10 @@ export default function SelectFieldNamingConvention({
           onClick={() => checkFormIsValid()}
           style={{
             width: "fit-content",
-            backgroundColor: "var(--submit-button-color)",
+            backgroundColor: "var(--highlighter3)",
             color: "var(--text-color)",
-            border: "1px solid var(--border-color)",
-            padding: "24px",
-            borderRadius: "16px",
+            padding: "20px",
+            borderRadius: "9999px",
             fontSize: "16px",
             cursor: "pointer",
           }}
@@ -45,9 +44,19 @@ export default function SelectFieldNamingConvention({
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content maxWidth="600px" size="4">
-        <Dialog.Title>How do you want to name your fields</Dialog.Title>
-        <Dialog.Description size="2" mb="4">
+      <Dialog.Content
+        maxWidth="600px"
+        size="4"
+        style={{ backgroundColor: "var(--mainBg)" }}
+      >
+        <Dialog.Title style={{ color: "var(--highlighter2)" }}>
+          How do you want to name your fields
+        </Dialog.Title>
+        <Dialog.Description
+          style={{ color: "var(--highlighter1)" }}
+          size="2"
+          mb="4"
+        >
           Do you want your fields to be a keyword and number (e.g. Field 1) or
           do you want to name each field individually?
         </Dialog.Description>

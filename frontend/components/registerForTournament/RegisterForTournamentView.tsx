@@ -21,16 +21,18 @@ export default function RegisterForTournamentView({
       style={{
         padding: "16px",
         minHeight: "100vh",
-        color: "var(--text-color)",
         gap: "16px",
         display: "flex",
         flexDirection: "column",
         margin: "auto",
+        backgroundColor: "var(--mainBg)",
       }}
     >
       <div className={styles.container}>
         {/* Use tournament name from props */}
-        <h1>Register for {tournament.name}</h1>
+        <h1 style={{ color: "var(--highlighter2)" }}>
+          Register for {tournament.name}
+        </h1>
         {/* Pass the tournament data down to the form */}
         <RegisterForTournamentForm tournament={tournament} />
       </div>
