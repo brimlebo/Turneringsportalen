@@ -50,7 +50,7 @@ export default function SelectFieldNamingConvention({
         style={{ backgroundColor: "var(--mainBg)" }}
       >
         <Dialog.Title style={{ color: "var(--highlighter2)" }}>
-          How do you want to name your fields
+          Naming of Fields
         </Dialog.Title>
         <Dialog.Description
           style={{ color: "var(--highlighter1)" }}
