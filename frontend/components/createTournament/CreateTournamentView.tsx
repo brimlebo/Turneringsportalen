@@ -10,7 +10,7 @@ export default function CreateTournamentView() {
       style={{
         padding: "16px",
         minHeight: "100vh",
-        color: "var(--text-color)",
+        backgroundColor: "var(--mainBg)",
         gap: "16px",
         display: "flex",
         flexDirection: "column",
@@ -18,7 +18,7 @@ export default function CreateTournamentView() {
       }}
     >
       <div className={styles.container}>
-        <h1>Create a Tournament</h1>
+        <h1 style={{ color: "var(--highlighter2)" }}>Create a Tournament</h1>
         <CreateTournamentForm />
       </div>
     </div>

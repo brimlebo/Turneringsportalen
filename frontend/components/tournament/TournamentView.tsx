@@ -7,21 +7,12 @@ import {
   Box,
   Card,
   Avatar,
-  Table,
   Grid,
-  Button,
 } from "@radix-ui/themes";
-import type {
-  Tournament,
-  Participant,
-  Match,
-  TournamentWithParticipantsAndMatches,
-  WholeTournamentDTO,
-} from "../../utils/types";
-import { createMatchSchedule, fetchTournamentById } from "@/utils/API";
+import type { WholeTournamentDTO } from "../../utils/types";
+import { fetchTournamentById } from "@/utils/API";
 import { MatchScheduleFiltering } from "../matchSchedulePresenting/MatchScheduleFiltering";
 import React from "react";
-import Link from "next/link";
 import TournamentViewButtonArea from "./TournamentViewButtonArea";
 
 type Props = {
@@ -29,9 +20,8 @@ type Props = {
 };
 
 export default async function TournamentView({ id }: Props) {
-  console.log("TournamentView: ", id);
   const wholeTournament: WholeTournamentDTO = await fetchTournamentById(id);
-  const { tournament, participants, schedule, field_names } = wholeTournament;
+  const { tournament, participants, schedule } = wholeTournament;
 
   return (
     <Container size="4">
@@ -44,20 +34,22 @@ export default async function TournamentView({ id }: Props) {
       >
         {/* Tournament Name */}
         <Flex direction="row" justify="between" width="100%">
-          <Heading size={"6"} as="h1">
+          <Heading size={"6"} as="h1" style={{ color: "var(--highlighter2)" }}>
             {tournament.name}
           </Heading>
-          <TournamentViewButtonArea id={id} />
+          <TournamentViewButtonArea scheduleExists={!!schedule} id={id} />
         </Flex>
 
         {/* Tournament Details */}
         <Flex direction="column" align="start" gap="2" width="100%">
-          <Heading size={"5"} as="h2">
+          <Heading size={"5"} as="h2" style={{ color: "var(--highlighter2)" }}>
             Tournament Details
           </Heading>
           <Flex direction={"row"} gap="8" wrap="wrap">
-            <Text>
-              <Strong>Tournament Start: </Strong>{" "}
+            <Text style={{ color: "var(--highlighter1)" }}>
+              <Strong style={{ color: "var(--highlighter2)" }}>
+                Tournament Start:{" "}
+              </Strong>{" "}
               {new Date(tournament.start_date).toLocaleDateString()}
               {" at "}
               {new Date(tournament.start_date).toLocaleTimeString([], {
@@ -65,11 +57,16 @@ export default async function TournamentView({ id }: Props) {
                 minute: "2-digit",
               })}
             </Text>
-            <Text>
-              <Strong>Location: </Strong> {tournament.location}
+            <Text style={{ color: "var(--highlighter1)" }}>
+              <Strong style={{ color: "var(--highlighter2)" }}>
+                Location:{" "}
+              </Strong>{" "}
+              {tournament.location}
             </Text>
-            <Text>
-              <Strong>Time Between Matches: </Strong>
+            <Text style={{ color: "var(--highlighter1)" }}>
+              <Strong style={{ color: "var(--highlighter2)" }}>
+                Time Between Matches:{" "}
+              </Strong>
               {tournament.match_interval} min
             </Text>
           </Flex>
@@ -77,7 +74,9 @@ export default async function TournamentView({ id }: Props) {
 
         {/* Participants Section */}
         <Flex direction={"column"} gap="3" width="100%">
-          <Heading size="5">Participants: </Heading>
+          <Heading size="5" style={{ color: "var(--highlighter2)" }}>
+            Participants:{" "}
+          </Heading>
           <Grid gap="2" columns={{ xs: "2", md: "4", lg: "6" }} width="100%">
             {participants && participants.length > 0 ? (
               participants.map((participant) => (
@@ -86,9 +85,21 @@ export default async function TournamentView({ id }: Props) {
                   height={"150px"}
                   key={participant.participant_id}
                 >
-                  <Card>
-                    <Flex gap="1" align="center" direction={"column"}>
+                  <Card
+                    style={{
+                      padding: "10px",
+                      backgroundColor: "var(--secondaryBg)",
+                      border: "1px solid var(--highlighter2)",
+                    }}
+                  >
+                    <Flex
+                      gap="1"
+                      align="center"
+                      direction={"column"}
+                      style={{ color: "var(--highlighter1)" }}
+                    >
                       <Avatar
+                        color="tomato"
                         size="6"
                         fallback={participant.name
                           .split(" ")
@@ -110,9 +121,13 @@ export default async function TournamentView({ id }: Props) {
 
         {/* Matches Section */}
         <Flex direction="column" width="100%">
-          <Heading size="5">Matches</Heading>
+          <Heading size="5" style={{ color: "var(--highlighter2)" }}>
+            Matches
+          </Heading>
           {!schedule || schedule.length === 0 ? (
-            <Box>Schedule not created yet</Box>
+            <Box style={{ color: "var(--highlighter1)" }}>
+              Schedule not created yet
+            </Box>
           ) : (
             <MatchScheduleFiltering matches={schedule} />
           )}

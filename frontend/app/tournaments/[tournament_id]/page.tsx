@@ -9,9 +9,11 @@ export default async function TournamentPage(props: { params: Params }) {
   const tournament_key = parseInt(param.tournament_id, 10);
 
   return (
-    <div className={styles.container}>
+    <div
+      style={{ backgroundColor: "var(--mainBg)" }}
+      className={styles.container}
+    >
       <TournamentView id={tournament_key} />
     </div>
   );
 }
- 

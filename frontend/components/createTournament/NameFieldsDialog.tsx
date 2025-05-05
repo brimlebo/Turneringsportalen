@@ -62,9 +62,9 @@ export default function NameFieldsDialog({
 
   // Common styles for the input fields
   const inputStyle = {
-    color: "var(--text-color)",
+    color: "var(--highlighter1)",
     padding: "14px",
-    borderRadius: "8px",
+    borderRadius: "999px",
     backgroundColor: "var(--input-color)",
     border: "1px solid var(--border-color)",
   };
@@ -75,11 +75,10 @@ export default function NameFieldsDialog({
         <Button
           style={{
             width: "fit-content",
-            backgroundColor: "var(--submit-button-color)",
+            backgroundColor: "var(--highlighter3)",
             color: "var(--text-color)",
-            border: "1px solid var(--border-color)",
-            padding: "24px",
-            borderRadius: "16px",
+            padding: "20px",
+            borderRadius: "9999px",
             fontSize: "16px",
             cursor: "pointer",
           }}
@@ -88,13 +87,21 @@ export default function NameFieldsDialog({
         </Button>
       </Dialog.Trigger>
 
-      <Dialog.Content size="4" maxWidth="600px">
-        <Dialog.Title>
+      <Dialog.Content
+        size="4"
+        maxWidth="600px"
+        style={{ backgroundColor: "var(--mainBg)" }}
+      >
+        <Dialog.Title style={{ color: "var(--highlighter2)" }}>
           {namingConvention === "keyword"
             ? "Name fields using keyword and number"
             : "Name each field individually"}
         </Dialog.Title>
-        <Dialog.Description size="2" mb="4">
+        <Dialog.Description
+          style={{ color: "var(--highlighter1)" }}
+          size="2"
+          mb="4"
+        >
           {namingConvention === "keyword"
             ? "Write your keyword below and we will automatically number your fields (e.g. Field 1, Field 2, etc.)"
             : "Write the name of each field below"}
@@ -102,7 +109,7 @@ export default function NameFieldsDialog({
 
         {namingConvention === "keyword" ? (
           <Flex direction="column" gap="3">
-            <label>
+            <label style={{ color: "var(--highlighter2)" }}>
               Keyword:{" "}
               <input
                 name="field_0"
@@ -125,7 +132,7 @@ export default function NameFieldsDialog({
         ) : (
           Array.from({ length: fieldCount }).map((_, index) => (
             <Flex direction="column" gap="3" key={index}>
-              <label>
+              <label style={{ color: "var(--highlighter2)" }}>
                 Field {index + 1}:{" "}
                 <input
                   name={`field_${index}`}
@@ -153,11 +160,10 @@ export default function NameFieldsDialog({
           <Button
             style={{
               width: "fit-content",
-              backgroundColor: "var(--submit-button-color)",
+              backgroundColor: "var(--tertiaryColor)",
               color: "var(--text-color)",
-              border: "1px solid var(--border-color)",
               padding: "20px",
-              borderRadius: "16px",
+              borderRadius: "9999px",
               fontSize: "16px",
               cursor: "pointer",
             }}
@@ -172,11 +178,10 @@ export default function NameFieldsDialog({
           <Button
             style={{
               width: "fit-content",
-              backgroundColor: "var(--submit-button-color)",
+              backgroundColor: "var(--highlighter3)",
               color: "var(--text-color)",
-              border: "1px solid var(--border-color)",
               padding: "20px",
-              borderRadius: "16px",
+              borderRadius: "9999px",
               fontSize: "16px",
               cursor: "pointer",
             }}

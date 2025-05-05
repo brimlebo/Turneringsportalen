@@ -8,7 +8,13 @@ type MatchScheduleTableProps = {
 export function MatchScheduleTable({ matches }: MatchScheduleTableProps) {
   return matches.flatMap((group, groupIndex) => [
     ...group.map((match) => (
-      <Table.Row key={match.match_id}>
+      <Table.Row
+        key={match.match_id}
+        style={{
+          backgroundColor: "var(--secondaryBg)",
+          color: "var(--highlighter1)",
+        }}
+      >
         <Table.Cell>{match.time}</Table.Cell>
         <Table.Cell>{match.participants[0].name}</Table.Cell>
         <Table.Cell>{match.participants[1].name}</Table.Cell>

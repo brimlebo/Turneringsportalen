@@ -121,17 +121,17 @@ export default function CreateTournamentForm() {
   }
   // Common styles for the labels
   const labelStyle = {
-    fontWeight: "500",
-    color: "var(--text-color)",
+    fontWeight: "550",
+    color: "var(--highlighter2)",
   };
 
   // Common styles for the input fields
   const inputStyle = {
-    color: "var(--text-color)",
+    color: "var(--highlighter1)",
     padding: "14px",
     borderRadius: "8px",
     backgroundColor: "var(--input-color)",
-    border: "1px solid var(--border-color)",
+    border: "1px solid var(--highlighter2)",
   };
 
   // Add error style
@@ -149,7 +149,7 @@ export default function CreateTournamentForm() {
         padding: "24px",
         border: "1px solid var(--border-color)",
         borderRadius: "28px",
-        backgroundColor: "var(--form-background)",
+        backgroundColor: "var(--secondaryBg)",
         color: "var(--text-color)",
       }}
     >
