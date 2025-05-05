@@ -10,7 +10,7 @@ export default function TournamentsPage() {
       className={styles.container}
       style={{ backgroundColor: "var(--mainBg)" }}
     >
-      <h1 style={{ color: "var(--highlighter2)" }}>Upcoming tournaments</h1>
+      <h1 style={{ color: "var(--highlighter2)" }}>Upcoming Tournaments</h1>
 
       <TournamentsOverview />
     </div>
