@@ -29,6 +29,12 @@ dependencies {
 
 	implementation("io.ktor:ktor-client-cio:3.1.3")
 
+	// Security and JWT
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt:0.12.6") // JWT verification library
+
+
+
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
