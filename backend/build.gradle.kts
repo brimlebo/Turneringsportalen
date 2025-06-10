@@ -35,7 +35,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	// Allows for easier api testing
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 kotlin {
